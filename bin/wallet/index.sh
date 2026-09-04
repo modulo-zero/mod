@@ -1,6 +1,24 @@
 #!/bin/bash
 
+function usage() {
+  echo "Usage: mod wallet <subcommand> [args...]"
+  echo
+  echo "Subcommands:"
+  echo "  add <private-key> <name>   import an existing key into the keystore"
+  echo "  create [name]              create a new keystore account"
+  echo "  address <account>          print the address of a keystore account"
+  echo "  list                       list the keystore accounts"
+  echo "  remove <account>           delete a keystore account"
+  echo
+  echo "Aliases: a=add  c=create  addr=address  l=list  r=remove"
+}
+
 function main() {
+  if [ $# -lt 1 ]; then
+    usage
+    exit 1
+  fi
+
   cd "${OPTIMISM_MONOREPO_ROOT}"
 
   # Apply aliases for convenience

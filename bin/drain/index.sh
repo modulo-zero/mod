@@ -19,7 +19,6 @@ function main() {
     if [[ "$rpc" != "devnet-l1" && "$rpc" != "devnet-l2" ]]; then
       RPC=$(mod rpc $rpc)
       balance=$(cast balance --rpc-url $RPC $1 --ether)
-      echo "here"
       echo $balance
       if [[ balance > 0.01 ]]; then
         echo $RPC

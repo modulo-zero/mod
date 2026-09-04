@@ -5,7 +5,7 @@ function blast() {
 }
 
 if [[ -z $1 ]] || [[ -z $2 ]] || [[ -z $3 ]] | [[ -z $4 ]]; then
-  echo "Usage:: blast e2e <network> <layer-sequence> <contract> <selector> <args>"
+  echo "Usage: mod e2e <env> <layer-sequence> <contract> <selector> [args...]"
   exit 1
 fi
 

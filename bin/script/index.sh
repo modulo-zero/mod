@@ -8,7 +8,7 @@ function checkStatus {
 
 function main() {
   if [ $# -lt 2 ]; then
-    echo "Usage: mod script <network> <l1 | l2 | null> <script-contract> <function-selector> <args>"
+    echo "Usage: mod script <env> [l1|l2] <script-contract> <function-selector> [args...]"
     exit 1
   fi
 

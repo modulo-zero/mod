@@ -1,6 +1,11 @@
 #!/bin/bash
 
 main() {
+  if [ $# -lt 1 ]; then
+    echo "Usage: mod trace <tx-hash>"
+    exit 1
+  fi
+
   # The directory of the trace script
   TRACE_VIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../lib/trace-vis/index.js"
 

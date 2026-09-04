@@ -6,7 +6,7 @@ NC='\033[0m'
 
 function main() {
   if [ $# -lt 1 ]; then
-    echo "Usage: mod balance <network> <l1 | l2 | null> <address>"
+    echo "Usage: mod balance <env> [l1|l2] <address>"
     exit 1
   fi
 

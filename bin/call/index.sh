@@ -2,7 +2,7 @@
 
 function main() {
   if [ $# -lt 2 ]; then
-    echo "Usage: mod call <network> <l1 | l2 | null> <address> <function-selector> <args>"
+    echo "Usage: mod call <env> [l1|l2] <address> <function-selector> [args...]"
     exit 1
   fi
 

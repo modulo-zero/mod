@@ -2,7 +2,8 @@
 
 function main() {
   if [ $# -lt 1 ]; then
-    echo "Usage:: mod rpc <network> OR mod rpc <environment> <l1 | l2>"
+    echo "Usage: mod rpc <network>"
+    echo "   or: mod rpc <env> <l1|l2>"
     exit 1
   fi
 

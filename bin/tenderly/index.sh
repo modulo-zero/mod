@@ -2,7 +2,7 @@
 
 function main() {
   if [[ -z $1 ]] || [[ -z $2 ]]; then
-      echo "Usage:: mod tenderly <network> <layer>"
+      echo "Usage: mod tenderly <env> <l1|l2>"
       exit 1
   fi
 

@@ -2,7 +2,8 @@
 
 function main() {
   if [[ -z $1 ]] || [[ -z $2 ]] || [[ -z $3 ]] || [[ -z $4 ]]; then
-      echo "Usage:: mod verify <verifier> <chainid> <address> <contract>"
+      echo "Usage: mod verify <verifier> <chain-id> <address> <contract> [forge-args...]"
+      echo "Verifiers: etherscan, blastscan, tenderly, tenderly-fork"
       exit 1
   fi
 
@@ -15,7 +16,8 @@ function main() {
   elif [ $1 = "tenderly-fork" ]; then
     tenderly_fork ${@:2}
   else
-    echo "Verifier not supported"
+    echo "Error: verifier '${1}' is not supported"
+    echo "Verifiers: etherscan, blastscan, tenderly, tenderly-fork"
   fi
 }
 
