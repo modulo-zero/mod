@@ -1,39 +1,76 @@
 #!/bin/bash
 
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/lib/help.sh"
+
+# Short aliases, as a table rather than a case statement so that the list has a
+# single definition: resolve_alias() and the help screen both read it. A case
+# statement let a duplicate `s)` arm shadow send's alias silently.
+MOD_ALIASES="a=address
+b=balance
+c=call
+e=e2e
+r=rpc
+s=script
+se=send
+t=trace
+ve=verify
+wa=wallet"
+
+# resolve_alias <word> - the command a short alias maps to, else the word itself
+resolve_alias() {
+  local pair
+  while IFS= read -r pair; do
+    if [ "${pair%%=*}" = "$1" ]; then
+      echo "${pair#*=}"
+      return 0
+    fi
+  done <<< "$MOD_ALIASES"
+  echo "$1"
+}
+
+# alias_for <command> - the short alias of a command, empty if it has none
+alias_for() {
+  local pair
+  while IFS= read -r pair; do
+    if [ "${pair#*=}" = "$1" ]; then
+      echo "${pair%%=*}"
+      return 0
+    fi
+  done <<< "$MOD_ALIASES"
+}
+
 usage() {
-  cat <<'EOF'
-mod-cli - tools for working on mod projects
+  local cmd width=0 alias description
 
-Usage:
-  mod <command> [args...]
+  # Command list is discovered from bin/, and the descriptions come from the
+  # mod-description header in each command, so this cannot drift.
+  while IFS= read -r cmd; do
+    [ ${#cmd} -gt $width ] && width=${#cmd}
+  done <<< "$(mod_commands)"
 
-Commands:
-  address       <network> <contract-name>                     print a deployed contract address
-  balance       <env> [l1|l2] <address>                       show the ether balance of an address
-  balance-full  <address>                                     show that balance on every configured network
-  call          <env> [l1|l2] <address> <selector> [args...]  make a read-only contract call
-  drain         <address>                                     sweep balances into an address
-  e2e           <env> <layers> <contract> <selector> [args]   run an end-to-end script sequence
-  pk            <account>                                     print the private key for a keystore account
-  rpc           <network> | <env> <l1|l2>                     resolve the rpc url for a network
-  script        <env> [l1|l2] <contract> <selector> [args...] run a forge script
-  send          <env> [l1|l2] <address> <selector> [args...]  send a transaction
-  tenderly      <env> <l1|l2>                                 create a tenderly fork and print its id
-  trace         <tx-hash>                                     visualize a transaction trace
-  verify        <verifier> <chain-id> <address> <contract>    verify a deployed contract
-  wallet        <subcommand> [args...]                        manage keystore accounts
-  help                                                        show this message
+  printf '%bmod-cli%b - tools for working on mod projects\n\n' "$MOD_BLUE" "$MOD_NC"
 
-Aliases:
-  a=address  b=balance  c=call  e=e2e  r=rpc  s=script  t=trace  ve=verify  wa=wallet
+  mod_heading "Usage:"
+  printf '  mod <command> [args...]\n'
+  printf '  mod <command> --help\n\n'
 
-Environment:
-  ACCOUNT    keystore account used to sign for script and send
-  FORK=true  route balance, call, script and send through a fresh tenderly fork
+  mod_heading "Commands:"
+  while IFS= read -r cmd; do
+    alias="$(alias_for "$cmd")"
+    description="$(mod_meta description "$(mod_command_file "$cmd")" | head -1)"
+    printf "  %-${width}s  %-3s  %s\n" "$cmd" "$alias" "$description"
+  done <<< "$(mod_commands)"
+  printf "  %-${width}s  %-3s  %s\n" "help" "" "show this message"
 
-Commands that take <env> read it from the mod.config.json of the project you are
-currently in. See the README for the full list of subcommands and known gaps.
-EOF
+  printf '\n'
+  mod_heading "Environment:"
+  printf '  ACCOUNT    keystore account used to sign for script and send\n'
+  printf '  FORK=true  route balance, call, script and send through a fresh tenderly fork\n'
+
+  printf '\n'
+  printf 'The second column is the short alias for each command.\n'
+  printf 'Commands taking <env> read it from the mod.config.json of the project you\n'
+  printf 'are in. See the README for known gaps.\n'
 }
 
 main() {
@@ -75,20 +112,24 @@ main() {
   call $@
 }
 
+unknown_command() {
+  echo "Error: unknown command '${1}'"
+  echo "Run 'mod help' to see the available commands."
+  exit 2
+}
+
 call() {
   # Apply aliases for convenience
-  CMD="${1}"
-  case $CMD in
-    b) CMD=balance ;;
-    t) CMD=trace ;;
-    ve) CMD=verify ;;
-    wa) CMD=wallet ;;
-    s) CMD=script ;;
-    a) CMD=address ;;
-    e) CMD=e2e ;;
-    c) CMD=call ;;
-    r) CMD=rpc ;;
-  esac
+  CMD="$(resolve_alias "${1}")"
+
+  # Answer --help before the argument shifting below, which consumes arguments
+  # and resolves an RPC (or opens a tenderly fork) for some commands. Asking for
+  # help should never reach the network.
+  if mod_is_help_flag "${2:-}"; then
+    [ -n "$(mod_command_file "$CMD")" ] || unknown_command "$CMD"
+    mod_print_help "$CMD"
+    exit 0
+  fi
 
   if [[ $CMD == "balance" || $CMD == "script" || $CMD == "call" || $CMD == "send" ]]; then
     if [[ $FORK == "true" ]]; then
@@ -129,9 +170,7 @@ call() {
   elif [ -f "${DIR}/bin/${CMD}/index.sh" ]; then
     "${DIR}/bin/${CMD}/index.sh" "$@"
   else
-    echo "Error: unknown command '${CMD}'"
-    echo "Run 'mod help' to see the available commands."
-    exit 2
+    unknown_command "$CMD"
   fi
 }
 

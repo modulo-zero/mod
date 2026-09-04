@@ -29,8 +29,14 @@ keys in `.env`, which is gitignored. Never commit `.env`.
 
 ```bash
 $ mod <command> [args...]
-$ mod help          # list every command
+$ mod help                # list every command, with its alias and description
+$ mod <command> --help    # usage, arguments and notes for one command
 ```
+
+`mod`, `mod help`, `mod -h` and `mod --help` all print the command list, which is
+built by scanning `bin/` at runtime, so it cannot drift from what is installed.
+Every command also accepts `-h` / `--help` as its first argument, and still prints
+its usage line and exits 1 when required arguments are missing.
 
 Commands that take `<env>` resolve it against the `mod.config.json` of the project
 you are currently in; `mod` walks up from your working directory to find it. The
@@ -55,8 +61,11 @@ optional `l1`/`l2` argument picks a layer for environments that define both.
 
 ### Aliases
 
-`a`=address, `b`=balance, `c`=call, `e`=e2e, `r`=rpc, `s`=script, `t`=trace,
-`ve`=verify, `wa`=wallet. `send` has no alias.
+`a`=address, `b`=balance, `c`=call, `e`=e2e, `r`=rpc, `s`=script, `se`=send,
+`t`=trace, `ve`=verify, `wa`=wallet.
+
+They are defined once in the `MOD_ALIASES` table in mod.sh, which both the
+dispatcher and `mod help` read.
 
 ### Environment variables
 
@@ -90,8 +99,41 @@ help output stays honest about what ships.
 
 1. Create a new subfolder under `bin` with your command name, exactly as you want people to type it.
 2. If you can write your command as a shell script, create a new index.sh file in that subfolder. Otherwise make it an index.js file.
-3. Print a `Usage: mod <your-command> ...` line and exit 1 when required arguments are missing.
-4. Edit shell.sh and add your command/subcommands to the level 1/level 2 completion cases.
-5. Add your command to the `usage()` function in mod.sh so it shows up in `mod help`.
+3. Document it with `mod-` header comments at the top of the file (see below). It
+   will appear in `mod help` automatically — there is no list to update.
+4. Source `lib/help.sh` and use its helpers so your command answers `--help` and
+   prints its usage when arguments are missing:
+
+   ```bash
+   source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../lib/help.sh"
+
+   if mod_is_help_flag "${1:-}"; then
+     mod_print_help <your-command>
+     exit 0
+   fi
+
+   if [ $# -lt 1 ]; then
+     mod_missing_args <your-command>
+   fi
+   ```
+
+5. Edit shell.sh and add your command/subcommands to the level 1/level 2 completion cases.
 6. Add your command to the usage table in README.md.
-7. (optional) Edit mod.sh and add an alias for your command to make it easier to type in.
+7. (optional) Add an alias to the `MOD_ALIASES` table in mod.sh to make it easier to type in.
+
+### Command headers
+
+Help text lives in header comments in the command itself, so the one-line
+description in `mod help` and the detail page in `mod <command> --help` cannot
+disagree. Both `#` and `//` comments are read, so node commands work the same way.
+
+```bash
+# mod-usage: mod balance <env> [l1|l2] <address>
+# mod-description: show the ether balance of an address
+# mod-arg: <env>       environment named in the project's mod.config.json
+# mod-arg: <address>   address to look up
+# mod-note: free-form line, printed last
+```
+
+`mod-usage`, `mod-arg` and `mod-note` may be repeated to produce several lines.
+`mod-description` should stay short — it is the one-line summary in `mod help`.

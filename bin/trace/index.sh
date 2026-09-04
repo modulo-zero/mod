@@ -1,9 +1,21 @@
 #!/bin/bash
+#
+# mod-usage: mod trace <tx-hash>
+# mod-description: visualize a transaction trace
+# mod-arg: <tx-hash>   hash of the transaction to trace
+# mod-note: Broken: depends on lib/trace-vis, which is not in this repo, and
+# mod-note: hardcodes the rpc url to http://localhost:9545.
+
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../lib/help.sh"
 
 main() {
+  if mod_is_help_flag "${1:-}"; then
+    mod_print_help trace
+    exit 0
+  fi
+
   if [ $# -lt 1 ]; then
-    echo "Usage: mod trace <tx-hash>"
-    exit 1
+    mod_missing_args trace
   fi
 
   # The directory of the trace script

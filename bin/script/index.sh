@@ -1,4 +1,16 @@
 #!/bin/bash
+#
+# mod-usage: mod script <env> [l1|l2] <script-contract> <function-selector> [args...]
+# mod-description: run a forge script
+# mod-arg: <env>                 environment named in the project's mod.config.json
+# mod-arg: [l1|l2]               layer, for environments that define both
+# mod-arg: <script-contract>     forge script contract to run
+# mod-arg: <function-selector>   signature to invoke, e.g. 'run()'
+# mod-arg: [args...]             extra arguments passed through to forge script
+# mod-note: Signs with the keystore account named in ACCOUNT, if that is set.
+# mod-note: Prompts for confirmation when the environment has verify set to true.
+
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../lib/help.sh"
 
 function checkStatus {
   if [ ! $? -eq 0 ]; then
@@ -7,9 +19,13 @@ function checkStatus {
 }
 
 function main() {
+  if mod_is_help_flag "${1:-}"; then
+    mod_print_help script
+    exit 0
+  fi
+
   if [ $# -lt 2 ]; then
-    echo "Usage: mod script <env> [l1|l2] <script-contract> <function-selector> [args...]"
-    exit 1
+    mod_missing_args script
   fi
 
   SCRIPT_CONTRACT=$1

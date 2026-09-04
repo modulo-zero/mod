@@ -1,22 +1,25 @@
 #!/bin/bash
+#
+# mod-usage: mod wallet <subcommand> [args...]
+# mod-description: manage keystore accounts
+# mod-arg: add <private-key> <name>   import an existing key into the keystore
+# mod-arg: create [name]              create a new keystore account
+# mod-arg: address <account>          print the address of a keystore account
+# mod-arg: list                       list the keystore accounts
+# mod-arg: remove <account>           delete a keystore account
+# mod-note: Subcommand aliases: a=add  c=create  addr=address  l=list  r=remove
+# mod-note: Keystore location comes from ETH_KEYSTORE_DIR in .env.
 
-function usage() {
-  echo "Usage: mod wallet <subcommand> [args...]"
-  echo
-  echo "Subcommands:"
-  echo "  add <private-key> <name>   import an existing key into the keystore"
-  echo "  create [name]              create a new keystore account"
-  echo "  address <account>          print the address of a keystore account"
-  echo "  list                       list the keystore accounts"
-  echo "  remove <account>           delete a keystore account"
-  echo
-  echo "Aliases: a=add  c=create  addr=address  l=list  r=remove"
-}
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../lib/help.sh"
 
 function main() {
+  if mod_is_help_flag "${1:-}"; then
+    mod_print_help wallet
+    exit 0
+  fi
+
   if [ $# -lt 1 ]; then
-    usage
-    exit 1
+    mod_missing_args wallet
   fi
 
   cd "${OPTIMISM_MONOREPO_ROOT}"
