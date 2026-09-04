@@ -57,7 +57,10 @@ optional `l1`/`l2` argument picks a layer for environments that define both.
 | `tenderly` | `<env> <l1\|l2>` | Create a Tenderly fork and print its id. |
 | `trace` | `<tx-hash>` | Visualize a transaction trace. See known gaps. |
 | `verify` | `<verifier> <chain-id> <address> <contract> [forge-args...]` | Verify a deployed contract. |
-| `wallet` | `<subcommand> [args...]` | Manage keystore accounts. Run `mod wallet` for subcommands. |
+| `wallet` | `<subcommand> [args...]` | Manage keystore accounts. Run `mod wallet --help` for subcommands. |
+
+Every command in this table accepts `--help` / `-h` for the same information plus
+per-argument detail, e.g. `mod verify --help`.
 
 ### Aliases
 
