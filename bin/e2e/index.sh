@@ -1,12 +1,28 @@
 #!/bin/bash
+#
+# mod-usage: mod e2e <env> <layer-sequence> <contract> <selector> [args...]
+# mod-description: run an end-to-end script sequence across l1 and l2
+# mod-arg: <env>              environment named in the project's mod.config.json
+# mod-arg: <layer-sequence>   digits picking the layer per step, e.g. 121
+# mod-arg: <contract>         test contract to run
+# mod-arg: <selector>         signature to invoke on the test contract
+# mod-arg: [args...]          arguments to the function
+# mod-note: Broken: shells out to ../../blast.sh, a leftover from the rename to
+# mod-note: mod, which does not exist. See the known gaps in the README.
+
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../lib/help.sh"
 
 function blast() {
   $(dirname $0)/../../blast.sh $@
 }
 
+if mod_is_help_flag "${1:-}"; then
+  mod_print_help e2e
+  exit 0
+fi
+
 if [[ -z $1 ]] || [[ -z $2 ]] || [[ -z $3 ]] | [[ -z $4 ]]; then
-  echo "Usage:: blast e2e <network> <layer-sequence> <contract> <selector> <args>"
-  exit 1
+  mod_missing_args e2e
 fi
 
 NETWORK=$1

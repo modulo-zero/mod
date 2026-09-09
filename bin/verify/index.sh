@@ -1,9 +1,24 @@
 #!/bin/bash
+#
+# mod-usage: mod verify <verifier> <chain-id> <address> <contract> [forge-args...]
+# mod-description: verify a deployed contract
+# mod-arg: <verifier>      etherscan, blastscan, tenderly or tenderly-fork
+# mod-arg: <chain-id>      chain id, or the fork id when using tenderly-fork
+# mod-arg: <address>       address of the deployed contract
+# mod-arg: <contract>      contract to verify, e.g. src/Foo.sol:Foo
+# mod-arg: [forge-args...] extra arguments passed through to forge verify-contract
+# mod-note: etherscan and blastscan prompt first, because they publish publicly.
+
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../lib/help.sh"
 
 function main() {
+  if mod_is_help_flag "${1:-}"; then
+    mod_print_help verify
+    exit 0
+  fi
+
   if [[ -z $1 ]] || [[ -z $2 ]] || [[ -z $3 ]] || [[ -z $4 ]]; then
-      echo "Usage:: mod verify <verifier> <chainid> <address> <contract>"
-      exit 1
+      mod_missing_args verify
   fi
 
   if [ $1 = "etherscan" ]; then
@@ -15,7 +30,8 @@ function main() {
   elif [ $1 = "tenderly-fork" ]; then
     tenderly_fork ${@:2}
   else
-    echo "Verifier not supported"
+    echo "Error: verifier '${1}' is not supported"
+    echo "Verifiers: etherscan, blastscan, tenderly, tenderly-fork"
   fi
 }
 

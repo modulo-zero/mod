@@ -1,9 +1,23 @@
 #!/bin/bash
+#
+# mod-usage: mod call <env> [l1|l2] <address> <function-selector> [args...]
+# mod-description: make a read-only contract call
+# mod-arg: <env>                 environment named in the project's mod.config.json
+# mod-arg: [l1|l2]               layer, for environments that define both
+# mod-arg: <address>             contract to call
+# mod-arg: <function-selector>   signature, e.g. 'balanceOf(address)'
+# mod-arg: [args...]             arguments to the function
+
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../lib/help.sh"
 
 function main() {
+  if mod_is_help_flag "${1:-}"; then
+    mod_print_help call
+    exit 0
+  fi
+
   if [ $# -lt 2 ]; then
-    echo "Usage: mod call <network> <l1 | l2 | null> <address> <function-selector> <args>"
-    exit 1
+    mod_missing_args call
   fi
 
   ADDRESS=$1

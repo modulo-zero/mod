@@ -10,15 +10,15 @@ function _mod_complete() {
   prev="${COMP_WORDS[COMP_CWORD-1]}"
 
   if [[ ${COMP_CWORD} -eq 1 ]]; then
-    options="balance script send call address verify pk wallet rpc"
-  elif [[ ${prev} == "balance" ||  ${prev} == "script" || ${prev} == "send" || ${prev} == "call" || ${prev} == "rpc" ]]; then
+    options="address balance balance-full call drain e2e help pk rpc script send tenderly trace verify wallet"
+  elif [[ ${prev} == "balance" ||  ${prev} == "script" || ${prev} == "send" || ${prev} == "call" || ${prev} == "rpc" || ${prev} == "tenderly" ]]; then
     options="mainnet sepolia"
   elif [[ ${prev} == "mainnet" || ${prev} == "sepolia" ]]; then
     options="l1 l2"
   elif [[ ${prev} == "verify" ]]; then
-    options="etherscan blastscan tenderly"
+    options="etherscan blastscan tenderly tenderly-fork"
   elif [[ ${prev} == "wallet" ]]; then
-    options="create add address list"
+    options="create add address list remove"
   fi
 
   # Use compgen to generate possible matches and assign to COMPREPLY.

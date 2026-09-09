@@ -1,9 +1,22 @@
 #!/bin/bash
+#
+# mod-usage: mod rpc <network>
+# mod-usage: mod rpc <env> <l1|l2>
+# mod-description: resolve the rpc url for a network
+# mod-arg: <network>   network key under .rpc in mod.config.json
+# mod-arg: <env>       environment named under .envs in mod.config.json
+# mod-arg: <l1|l2>     layer to resolve; both are printed as json if omitted
+
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../lib/help.sh"
 
 function main() {
+  if mod_is_help_flag "${1:-}"; then
+    mod_print_help rpc
+    exit 0
+  fi
+
   if [ $# -lt 1 ]; then
-    echo "Usage:: mod rpc <network> OR mod rpc <environment> <l1 | l2>"
-    exit 1
+    mod_missing_args rpc
   fi
 
   DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

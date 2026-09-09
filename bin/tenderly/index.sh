@@ -1,9 +1,21 @@
 #!/bin/bash
+#
+# mod-usage: mod tenderly <env> <l1|l2>
+# mod-description: create a tenderly fork and print its id
+# mod-arg: <env>      environment named in the project's mod.config.json
+# mod-arg: <l1|l2>    layer to fork
+# mod-note: Needs TENDERLY_ORG, TENDERLY_PROJECT and TENDERLY_API_KEY in .env.
+
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../lib/help.sh"
 
 function main() {
+  if mod_is_help_flag "${1:-}"; then
+    mod_print_help tenderly
+    exit 0
+  fi
+
   if [[ -z $1 ]] || [[ -z $2 ]]; then
-      echo "Usage:: mod tenderly <network> <layer>"
-      exit 1
+      mod_missing_args tenderly
   fi
 
   RPC=$(mod rpc $1 $2)
