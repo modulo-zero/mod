@@ -1,6 +1,20 @@
 #!/bin/bash
 
-source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/lib/help.sh"
+# Resolve symlinks so that `mod` still finds lib/, bin/ and its .env when it is
+# linked into a PATH directory (e.g. /usr/local/bin/mod). `readlink -f` is not
+# portable to older macOS, so follow the chain by hand.
+MOD_SELF="${BASH_SOURCE[0]}"
+while [ -L "$MOD_SELF" ]; do
+  MOD_TARGET="$(readlink "$MOD_SELF")"
+  case "$MOD_TARGET" in
+    /*) MOD_SELF="$MOD_TARGET" ;;
+    *)  MOD_SELF="$(dirname "$MOD_SELF")/$MOD_TARGET" ;;
+  esac
+done
+MOD_DIR="$( cd "$( dirname "$MOD_SELF" )" && pwd )"
+unset MOD_SELF MOD_TARGET
+
+source "${MOD_DIR}/lib/help.sh"
 
 # Short aliases, as a table rather than a case statement so that the list has a
 # single definition: resolve_alias() and the help screen both read it. A case
@@ -75,8 +89,7 @@ usage() {
 
 main() {
   # The directory of the script
-  DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
+  DIR="$MOD_DIR"
   if [[ $MOD_INIT -ne "1" ]]; then
     # Check if the env has been loaded properly
     if [ ! -f "${DIR}/.env" ]; then

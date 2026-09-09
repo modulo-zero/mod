@@ -45,8 +45,8 @@ function add() {
     fi
   fi
 
-  output=$(cast wallet import -k $ETH_KEYSTORE_DIR --private-key $1 $2)
-  address=$(echo $output | sed 's/^.*Address: //')
+  output=$(cast wallet import -k "$ETH_KEYSTORE_DIR" --private-key $1 $2 2>&1)
+  address=$(echo "$output" | grep -oE '0x[0-9a-fA-F]{40}' | head -1)
   cp $ETH_KEYSTORE_DIR/$2 $ETH_KEYSTORE_DIR/$address
   echo $output
 }
@@ -65,9 +65,17 @@ function create() {
     fi
   fi
 
-  output=$(cast wallet new $ETH_KEYSTORE_DIR)
-  file=$(echo $output | sed 's/Created new encrypted keystore file: //' | sed 's/ Address:.*//')
-  address=$(echo $output | sed 's/^.*Address: //')
+  # Newer cast versions print the human readable lines on stderr and only the
+  # address on stdout, so capture both streams and grep the pieces out rather
+  # than depending on the ordering or the stream.
+  output=$(cast wallet new "$ETH_KEYSTORE_DIR" 2>&1)
+  file=$(echo "$output" | grep -o 'keystore file: [^ ]*' | sed 's/keystore file: *//' | head -1)
+  address=$(echo "$output" | grep -oE '0x[0-9a-fA-F]{40}' | head -1)
+  if [ -z "$file" ] || [ -z "$address" ]; then
+    echo "$output"
+    echo "Error: could not parse the output of 'cast wallet new'"
+    exit 1
+  fi
   if [ ! -z "$1" ]; then
     cp $file $ETH_KEYSTORE_DIR/$1
   fi
