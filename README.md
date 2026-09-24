@@ -51,7 +51,7 @@ mod config path       # print the file location
 
 RPC urls come from each project's `mod.config.json`, so a fresh config needs no
 edits for `rpc`, `balance`, `call` or `address`. The keystore password is not
-kept in the config; `mod config password` writes it to the file `ETH_PASSWORD`
+kept in the config; `mod config password` writes it to the file `ETH_PASSWORD_FILE`
 points to (`~/.foundry/keystore_password` by default), which is what Foundry's
 `--password-file` convention expects.
 

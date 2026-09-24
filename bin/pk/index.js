@@ -3,7 +3,7 @@ const fs = require('fs');
 // mod-usage: mod pk <account>
 // mod-description: print the private key for a keystore account
 // mod-arg: <account>   keystore account name or address, under ETH_KEYSTORE_DIR
-// mod-note: Decrypts with the password in the file ETH_PASSWORD points to, the
+// mod-note: Decrypts with the password in the file ETH_PASSWORD_FILE points to, the
 // mod-note: same file cast and forge use. Set it with `mod config password`.
 // mod-note: Prints a secret to stdout, where pipes, shell history, scrollback
 // mod-note: and CI logs can capture it. Prefer passing --account to cast or
@@ -60,7 +60,7 @@ function main(account) {
 
   const expand = (p) => p.replace(/^~/, process.env.HOME);
   const keystorePath = expand(`${process.env['ETH_KEYSTORE_DIR']}/${account}`);
-  const passwordPath = expand(process.env['ETH_PASSWORD'] || '');
+  const passwordPath = expand(process.env['ETH_PASSWORD_FILE'] || '');
   if (!passwordPath || !fs.existsSync(passwordPath)) {
     console.error(`Error: no keystore password file at '${passwordPath}'.`);
     console.error("Set one with 'mod config password'.");

@@ -5,7 +5,7 @@
 # mod-arg: edit      open the config in $EDITOR (the default)
 # mod-arg: path      print the location of the config file
 # mod-arg: check     list which keys are set, without printing their values
-# mod-arg: password  prompt for the keystore password and store it in ETH_PASSWORD
+# mod-arg: password  prompt for the keystore password and store it in ETH_PASSWORD_FILE
 # mod-arg: migrate   move a legacy .env from the checkout to the global location
 # mod-note: The config lives at ~/.mod, or wherever MOD_CONFIG points.
 # mod-note: It is created from .env.config by install.sh and is never committed.
@@ -74,10 +74,10 @@ function check() {
   done <<< "$(template_keys)"
 }
 
-# Writes the keystore password to the file ETH_PASSWORD points to, which is
+# Writes the keystore password to the file ETH_PASSWORD_FILE points to, which is
 # what cast, forge and mod pk read, so the password itself never sits in ~/.mod.
 function password() {
-  local file="${ETH_PASSWORD:-$HOME/.foundry/keystore_password}"
+  local file="${ETH_PASSWORD_FILE:-$HOME/.foundry/keystore_password}"
   file="${file/#\~/$HOME}"
   local pw1 pw2
   printf 'Keystore password: '; read -r -s pw1; echo
