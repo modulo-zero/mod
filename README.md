@@ -13,9 +13,17 @@ This clones the repo to `~/mod-cli` and runs the installer. From an existing
 checkout, run `./install.sh` instead. Set `MOD_DIR` to clone somewhere else, or
 `MOD_REPO` to clone over https instead of ssh.
 
-The installer checks for the tools `mod` shells out to, links `mod` onto your
-PATH, creates `.env` from the template, and enables tab completion in bash or
-zsh. It is safe to rerun.
+The installer checks for the tools `mod` shells out to, links `mod` into
+`/usr/local/bin` (asking for sudo if needed; set `MOD_BIN_DIR` to link elsewhere),
+and creates `~/.mod` from the template. It does not edit your shell rc files and
+is safe to rerun.
+
+Tab completion and the `m` alias are optional. To enable them, add this line to
+your `.bashrc` or `.zshrc`:
+
+```bash
+source ~/mod-cli/shell.sh
+```
 
 To update later, run `mod upgrade`. It pulls the checkout and reruns the
 installer; `mod pk` reinstalls its npm packages on its next run if they changed.

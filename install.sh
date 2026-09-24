@@ -7,7 +7,7 @@
 #
 #   MOD_DIR=~/src/mod            # where to clone (default ~/mod-cli)
 #   MOD_REPO=<git url>           # what to clone (default github modulo-zero/mod)
-#   MOD_BIN_DIR=/opt/bin         # where to link mod (default /usr/local/bin or ~/.local/bin)
+#   MOD_BIN_DIR=~/.local/bin      # where to link mod (default /usr/local/bin)
 
 set -u
 
@@ -59,43 +59,34 @@ elif [ ! -f "${MOD_CONFIG}" ]; then
   echo "Created ${MOD_CONFIG} from the template. Run 'mod config' to fill in your keys."
 fi
 
-# 3. Put `mod` on PATH via a symlink. mod.sh resolves the link back to this
-#    directory, so lib/, bin/ and .env are found wherever the link lives.
-if [ -n "${MOD_BIN_DIR:-}" ]; then
-  BIN_DIR="$MOD_BIN_DIR"
-elif [ -d /usr/local/bin ] && [ -w /usr/local/bin ]; then
-  BIN_DIR=/usr/local/bin
+# 3. Put `mod` on PATH by linking into /usr/local/bin, which every shell
+#    already searches, so no rc file needs editing. mod.sh resolves the link
+#    back to this directory, so lib/, bin/ and the config are found from there.
+BIN_DIR="${MOD_BIN_DIR:-/usr/local/bin}"
+if [ -w "$BIN_DIR" ]; then
+  ln -sf "${MOD_DIR}/mod.sh" "${BIN_DIR}/mod"
 else
-  BIN_DIR="$HOME/.local/bin"
+  echo "Linking into ${BIN_DIR} needs sudo:"
+  sudo ln -sf "${MOD_DIR}/mod.sh" "${BIN_DIR}/mod" || exit 1
 fi
-mkdir -p "$BIN_DIR"
-ln -sf "${MOD_DIR}/mod.sh" "${BIN_DIR}/mod"
 echo "Linked ${BIN_DIR}/mod -> ${MOD_DIR}/mod.sh"
 
 case ":$PATH:" in
   *":${BIN_DIR}:"*) ;;
-  *)
-    echo
-    echo "${BIN_DIR} is not on your PATH. Add this line to your shell rc file:"
-    echo "  export PATH=\"${BIN_DIR}:\$PATH\""
-    ;;
+  *) echo "Note: ${BIN_DIR} is not on your PATH." ;;
 esac
 
-# 4. Optional: tab completion and the `m` alias, only once per rc file.
-rc=""
-case "$(basename "${SHELL:-}")" in
-  bash) rc="$HOME/.bashrc" ;;
-  zsh)  rc="$HOME/.zshrc" ;;
-esac
-line="source ${MOD_DIR}/shell.sh"
-if [ -n "$rc" ]; then
-  if ! grep -qsF "$line" "$rc"; then
-    printf '\n# mod-cli completion and aliases\n%s\n' "$line" >> "$rc"
-    echo "Added tab completion to ${rc}. Open a new shell or run: source ${rc}"
+# 4. Clean up rc lines left by the previous installer, which sourced shell.sh
+#    from a checkout that may no longer exist. Completion is now opt-in; see
+#    the README.
+for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
+  [ -f "$rc" ] || continue
+  if grep -qE '^source .*/shell\.sh$' "$rc"; then
+    sed -i.mod-bak -E '/^# mod-cli completion and aliases$/d; /^source .*\/shell\.sh$/d' "$rc"
+    rm -f "${rc}.mod-bak"
+    echo "Removed the old 'source .../shell.sh' line from ${rc}. Start a new shell to drop the stale alias."
   fi
-else
-  echo "For tab completion, add to your shell rc: ${line}"
-fi
+done
 
 echo
 echo "Done. Try: mod help"
