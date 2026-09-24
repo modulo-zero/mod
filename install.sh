@@ -1,51 +1,80 @@
 #!/bin/bash
+#
+# Installs mod by linking mod.sh onto your PATH. Safe to rerun.
+#
+#   ./install.sh                 # links into ~/.local/bin (or /usr/local/bin)
+#   MOD_BIN_DIR=/opt/bin ./install.sh
 
-main() {
-  INSTALL_STATUS=0
+set -u
 
-  # 1. Check if golang is installed
-  which go > /dev/null
-  if [ $? -ne 0 ]; then
-    echo "Error: Golang is not installed."
-    INSTALL_STATUS=1
-  fi
+MOD_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-  # 2. Check if nodejs is installed
-  which node > /dev/null
-  if [ $? -ne 0 ]; then
-    echo "Error: Node.js is not installed."
-    INSTALL_STATUS=1
-  fi
-
-  # If either Golang or Node.js isn't installed, stop execution
-  if [ $INSTALL_STATUS -ne 0 ]; then
-    echo "Both Golang and Node.js must be installed to continue."
-    exit 1
-  fi
-
-  # 3. Run npm install
-  npm install -s
-
-  # 4. Check if mod is accessible in user's path
-  if [ "${_MOD_CLI_INIT:-0}" -ne 1 ]; then
-    # Determine the user's shell and append to the appropriate rc file
-    CURRENT_SHELL=$(basename $SHELL)
-    _MOD_CLI_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-    if [ "$CURRENT_SHELL" == "bash" ]; then
-      echo -e "\nsource ${_MOD_CLI_PATH}/shell.sh" >> ~/.bashrc
-      echo "Added mod to .bashrc. Don't forget to source ~/.bashrc"
-    elif [ "$CURRENT_SHELL" == "zsh" ]; then
-      echo -e "\nsource ${_MOD_CLI_PATH}/shell.sh" >> ~/.zshrc
-      echo "Added mod to .zshrc. Don't forget to source ~/.zshrc"
-    else
-      echo "Unsupported shell. Please add mod to your shell rc manually:"
-      echo "source ${_MOD_CLI_PATH}/shell.sh"
-      exit 1
-    fi
-  else
-    echo "The mod-cli has already been initialized."
+# 1. Runtime dependencies. Node is only needed by `mod pk`, and is checked
+#    lazily by mod.sh the first time that command runs.
+missing=0
+need() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "Error: '$1' is not installed. $2"
+    missing=1
   fi
 }
+need cast "Install Foundry: curl -L https://foundry.paradigm.xyz | bash && foundryup"
+need forge "Install Foundry: curl -L https://foundry.paradigm.xyz | bash && foundryup"
+need jq   "Install jq: brew install jq  (or apt install jq)"
+if [ "$missing" -ne 0 ]; then
+  echo "Install the missing tools above and rerun ./install.sh"
+  exit 1
+fi
 
-main
+# 2. Secrets file, kept outside the checkout so that it survives moves and
+#    reinstalls. Copy the template if there is none yet; never overwrite.
+MOD_CONFIG="${MOD_CONFIG:-$HOME/.mod}"
+if [ -f "${MOD_DIR}/.env" ]; then
+  echo "Note: using the legacy ${MOD_DIR}/.env. Run 'mod config migrate' to move it to ${MOD_CONFIG}."
+elif [ ! -f "${MOD_CONFIG}" ]; then
+  mkdir -p "$(dirname "${MOD_CONFIG}")"
+  cp "${MOD_DIR}/.env.config" "${MOD_CONFIG}"
+  chmod 600 "${MOD_CONFIG}"
+  echo "Created ${MOD_CONFIG} from the template. Run 'mod config' to fill in your keys."
+fi
+
+# 3. Put `mod` on PATH via a symlink. mod.sh resolves the link back to this
+#    directory, so lib/, bin/ and .env are found wherever the link lives.
+if [ -n "${MOD_BIN_DIR:-}" ]; then
+  BIN_DIR="$MOD_BIN_DIR"
+elif [ -d /usr/local/bin ] && [ -w /usr/local/bin ]; then
+  BIN_DIR=/usr/local/bin
+else
+  BIN_DIR="$HOME/.local/bin"
+fi
+mkdir -p "$BIN_DIR"
+ln -sf "${MOD_DIR}/mod.sh" "${BIN_DIR}/mod"
+echo "Linked ${BIN_DIR}/mod -> ${MOD_DIR}/mod.sh"
+
+case ":$PATH:" in
+  *":${BIN_DIR}:"*) ;;
+  *)
+    echo
+    echo "${BIN_DIR} is not on your PATH. Add this line to your shell rc file:"
+    echo "  export PATH=\"${BIN_DIR}:\$PATH\""
+    ;;
+esac
+
+# 4. Optional: tab completion and the `m` alias, only once per rc file.
+rc=""
+case "$(basename "${SHELL:-}")" in
+  bash) rc="$HOME/.bashrc" ;;
+  zsh)  rc="$HOME/.zshrc" ;;
+esac
+line="source ${MOD_DIR}/shell.sh"
+if [ -n "$rc" ]; then
+  if ! grep -qsF "$line" "$rc"; then
+    printf '\n# mod-cli completion and aliases\n%s\n' "$line" >> "$rc"
+    echo "Added tab completion to ${rc}. Open a new shell or run: source ${rc}"
+  fi
+else
+  echo "For tab completion, add to your shell rc: ${line}"
+fi
+
+echo
+echo "Done. Try: mod help"

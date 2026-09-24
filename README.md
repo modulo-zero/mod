@@ -3,27 +3,43 @@ mod-cli
 
 Tools for working on mod projects.
 
-## Dependencies
-
-Install node 18 and go 1.20.
-
-TODO add these steps to the installation script.
-
 ## Installation
 
 ```bash
-# set up your secrets
-$ cp .env.config .env
-
-# run the install script
-$ ./install.sh
-
-# or similar, if not using zsh
-$ source ~/.zshrc
+git clone <this repo> ~/mod-cli && cd ~/mod-cli
+./install.sh
+mod help
 ```
 
-`.env.config` is a checked-in template. It holds no real values — fill in your own
-keys in `.env`, which is gitignored. Never commit `.env`.
+The installer checks for the tools `mod` shells out to, links `mod` onto your
+PATH, creates `.env` from the template, and enables tab completion in bash or
+zsh. It is safe to rerun.
+
+To update later, run `mod upgrade`. It pulls the checkout and reruns the
+installer; `mod pk` reinstalls its npm packages on its next run if they changed.
+
+Requirements:
+
+| Tool | Needed by | Install |
+| --- | --- | --- |
+| [Foundry](https://getfoundry.sh) (`cast`, `forge`) | almost everything | `curl -L https://foundry.paradigm.xyz \| bash && foundryup` |
+| `jq` | config lookups | `brew install jq` / `apt install jq` |
+| node 18+ | `mod pk` only | `brew install node`; its npm packages install on first use |
+
+### Configuration
+
+Keys and secrets live in one file outside the checkout, `~/.mod`
+(override the location with `MOD_CONFIG`). The installer creates it from the
+checked-in template `.env.config`, which holds no real values.
+
+```bash
+mod config          # open the config in $EDITOR
+mod config check    # list which keys are set, without printing values
+mod config path     # print the file location
+```
+
+Older installs that kept a `.env` inside the checkout keep working; run
+`mod config migrate` to move it to the global location.
 
 ## Usage
 
@@ -48,6 +64,7 @@ optional `l1`/`l2` argument picks a layer for environments that define both.
 | `balance` | `<env> [l1\|l2] <address>` | Show the ether balance of an address. |
 | `balance-full` | `<address>` | Show that balance on every configured network. |
 | `call` | `<env> [l1\|l2] <address> <selector> [args...]` | Make a read-only contract call. |
+| `config` | `[edit\|path\|check\|migrate]` | Edit or inspect the global config file. |
 | `drain` | `<address>` | Sweep balances into an address. See known gaps. |
 | `e2e` | `<env> <layers> <contract> <selector> [args...]` | Run an end-to-end script sequence. See known gaps. |
 | `pk` | `<account>` | Print the private key for a keystore account. See below. |
@@ -56,6 +73,7 @@ optional `l1`/`l2` argument picks a layer for environments that define both.
 | `send` | `<env> [l1\|l2] <address> <selector> [args...]` | Send a transaction. |
 | `tenderly` | `<env> <l1\|l2>` | Create a Tenderly fork and print its id. |
 | `trace` | `<tx-hash>` | Visualize a transaction trace. See known gaps. |
+| `upgrade` | | Pull the latest version and rerun the installer. |
 | `verify` | `<verifier> <chain-id> <address> <contract> [forge-args...]` | Verify a deployed contract. |
 | `wallet` | `<subcommand> [args...]` | Manage keystore accounts. Run `mod wallet --help` for subcommands. |
 

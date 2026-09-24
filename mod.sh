@@ -91,13 +91,23 @@ main() {
   # The directory of the script
   DIR="$MOD_DIR"
   if [[ $MOD_INIT -ne "1" ]]; then
-    # Check if the env has been loaded properly
-    if [ ! -f "${DIR}/.env" ]; then
-      echo "Error: no .env found at ${DIR}/.env"
-      echo "Create one from the template with: cp ${DIR}/.env.config ${DIR}/.env"
-      exit 1
+    # Load secrets. The checked-in-tree .env is still honoured for existing
+    # installs, otherwise the global config file is used.
+    export MOD_CONFIG="${MOD_CONFIG:-$HOME/.mod}"
+    if [ -f "${DIR}/.env" ]; then
+      source "${DIR}/.env"
+    elif [ -f "${MOD_CONFIG}" ]; then
+      source "${MOD_CONFIG}"
+    else
+      case "${1:-}" in
+        "" | config | help | -h | --help) ;;
+        *)
+          echo "Error: no config found at ${MOD_CONFIG}"
+          echo "Run 'mod config' to create it and fill in your keys."
+          exit 1
+          ;;
+      esac
     fi
-    source "${DIR}/.env"
 
     export MOD_INIT=1
 
@@ -179,11 +189,28 @@ call() {
   # Execute the command
   shift
   if [ -f "${DIR}/bin/${CMD}/index.js" ]; then
+    ensure_node_deps
     node "${DIR}/bin/${CMD}/index.js" $@
   elif [ -f "${DIR}/bin/${CMD}/index.sh" ]; then
     "${DIR}/bin/${CMD}/index.sh" "$@"
   else
     unknown_command "$CMD"
+  fi
+}
+
+# Only the javascript commands need node, so its dependencies are installed
+# on first use rather than by install.sh.
+ensure_node_deps() {
+  if ! command -v node >/dev/null 2>&1; then
+    echo "Error: '${CMD}' needs node, which is not installed."
+    echo "Install node 18 or newer, e.g. https://nodejs.org or 'brew install node'."
+    exit 1
+  fi
+  # Install on first use, and reinstall after an upgrade changed the lockfile.
+  if [ ! -d "${DIR}/node_modules" ] || \
+     [ "${DIR}/package-lock.json" -nt "${DIR}/node_modules/.package-lock.json" ]; then
+    echo "Installing node dependencies for '${CMD}'..."
+    (cd "${DIR}" && npm install --silent --no-audit --no-fund) || exit 1
   fi
 }
 

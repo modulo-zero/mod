@@ -10,13 +10,15 @@ function _mod_complete() {
   prev="${COMP_WORDS[COMP_CWORD-1]}"
 
   if [[ ${COMP_CWORD} -eq 1 ]]; then
-    options="address balance balance-full call drain e2e help pk rpc script send tenderly trace verify wallet"
+    options="address balance balance-full call config drain e2e help pk rpc script send tenderly trace upgrade verify wallet"
   elif [[ ${prev} == "balance" ||  ${prev} == "script" || ${prev} == "send" || ${prev} == "call" || ${prev} == "rpc" || ${prev} == "tenderly" ]]; then
     options="mainnet sepolia"
   elif [[ ${prev} == "mainnet" || ${prev} == "sepolia" ]]; then
     options="l1 l2"
   elif [[ ${prev} == "verify" ]]; then
     options="etherscan blastscan tenderly tenderly-fork"
+  elif [[ ${prev} == "config" ]]; then
+    options="edit path check migrate"
   elif [[ ${prev} == "wallet" ]]; then
     options="create add address list remove"
   fi
@@ -48,8 +50,9 @@ complete -F _mod_complete "${_MOD_CLI_PATH}/mod.sh"
 complete -F _mod_complete mod 
 complete -F _mod_complete m
 
-# convenient aliases
-alias mod="${_MOD_CLI_PATH}/mod.sh"
+# convenient aliases. install.sh puts `mod` on PATH; the alias is only a
+# fallback for checkouts that were never installed.
+command -v mod >/dev/null 2>&1 || alias mod="${_MOD_CLI_PATH}/mod.sh"
 alias m=mod
 
 # cleanup

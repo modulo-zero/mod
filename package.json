@@ -12,14 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "chalk": "^4.1.2",
-    "console-table-printer": "^2.11.2",
     "dotenv": "^16.3.1",
-    "ethers": "^6.7.1",
-    "js-sha3": "^0.9.1",
-    "keythereum": "^2.0.0",
-    "moment-timezone": "^0.5.43",
-    "node-fetch": "^2.7.0",
-    "yargs": "^17.7.2"
+    "keythereum": "^2.0.0"
   }
 }
