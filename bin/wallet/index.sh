@@ -106,7 +106,12 @@ function create() {
 }
 
 function address() {
-  cast wallet address --account $1
+  pw_file="$(keystore_password_file)"
+  if [ -n "$pw_file" ]; then
+    cast wallet address --account $1 --password-file "$pw_file"
+  else
+    cast wallet address --account $1
+  fi
 }
 
 function list() {
@@ -114,9 +119,19 @@ function list() {
 }
 
 function remove() {
-  ADDRESS=$(mod wallet address $1)
-  rm $ETH_KEYSTORE_DIR/$1
-  rm $ETH_KEYSTORE_DIR/$ADDRESS
+  local file="${ETH_KEYSTORE_DIR/#\~/$HOME}/$1"
+  if [ ! -f "$file" ]; then
+    echo "Error: no keystore named '$1' in ${ETH_KEYSTORE_DIR}"
+    exit 1
+  fi
+  # The address is stored unencrypted in the keystore, so no password needed.
+  ADDRESS="$(grep -oE '"address" *: *"(0x)?[0-9a-fA-F]{40}"' "$file" | grep -oE '[0-9a-fA-F]{40}' | head -1)"
+  if [ -z "$ADDRESS" ]; then
+    echo "Error: could not read the address from ${file}; nothing removed."
+    exit 1
+  fi
+  rm -f "$file" "${ETH_KEYSTORE_DIR/#\~/$HOME}/0x${ADDRESS}"
+  echo "Removed wallet: $1 (0x$ADDRESS)"
 }
 
 main $@
