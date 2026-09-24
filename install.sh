@@ -2,7 +2,7 @@
 #
 # Installs mod by linking mod.sh onto your PATH. Safe to rerun.
 #
-#   curl -fsSL https://raw.githubusercontent.com/modulo-zero/mod/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/modulo-zero/mod/master/install.sh | bash
 #   ./install.sh                 # from an existing checkout
 #
 #   MOD_DIR=~/src/mod            # where to clone (default ~/mod-cli)

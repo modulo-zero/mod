@@ -6,7 +6,7 @@ Tools for working on mod projects.
 ## Installation
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/modulo-zero/mod/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/modulo-zero/mod/master/install.sh | bash
 ```
 
 This clones the repo to `~/mod-cli` and runs the installer. From an existing
