@@ -8,7 +8,9 @@
 # mod-arg: list                       list the keystore accounts
 # mod-arg: remove <account>           delete a keystore account
 # mod-note: Subcommand aliases: a=add  c=create  addr=address  l=list  r=remove
-# mod-note: Keystore location comes from ETH_KEYSTORE_DIR in .env.
+# mod-note: Keystore location comes from ETH_KEYSTORE_DIR in the config.
+# mod-note: create and add encrypt with the password file from `mod config
+# mod-note: password` when it exists, and prompt for one otherwise.
 
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../lib/help.sh"
 
@@ -45,10 +47,24 @@ function add() {
     fi
   fi
 
-  output=$(cast wallet import -k "$ETH_KEYSTORE_DIR" --private-key $1 $2 2>&1)
+  pw_file="$(keystore_password_file)"
+  if [ -n "$pw_file" ]; then
+    output=$(cast wallet import -k "$ETH_KEYSTORE_DIR" --private-key $1 --unsafe-password "$(cat "$pw_file")" $2 2>&1)
+  else
+    output=$(cast wallet import -k "$ETH_KEYSTORE_DIR" --private-key $1 $2 2>&1)
+  fi
   address=$(echo "$output" | grep -oE '0x[0-9a-fA-F]{40}' | head -1)
   cp $ETH_KEYSTORE_DIR/$2 $ETH_KEYSTORE_DIR/$address
   echo $output
+}
+
+# keystore_password_file - the file `mod config password` wrote, if any. When it
+# exists create/add encrypt with it instead of prompting, so the file always
+# matches the keystores.
+function keystore_password_file() {
+  local file="${ETH_PASSWORD_FILE:-}"
+  file="${file/#\~/$HOME}"
+  [ -n "$file" ] && [ -f "$file" ] && echo "$file"
 }
 
 function create() {
@@ -68,7 +84,12 @@ function create() {
   # Newer cast versions print the human readable lines on stderr and only the
   # address on stdout, so capture both streams and grep the pieces out rather
   # than depending on the ordering or the stream.
-  output=$(cast wallet new "$ETH_KEYSTORE_DIR" 2>&1)
+  pw_file="$(keystore_password_file)"
+  if [ -n "$pw_file" ]; then
+    output=$(cast wallet new "$ETH_KEYSTORE_DIR" --unsafe-password "$(cat "$pw_file")" 2>&1)
+  else
+    output=$(cast wallet new "$ETH_KEYSTORE_DIR" 2>&1)
+  fi
   file=$(echo "$output" | grep -o 'keystore file: [^ ]*' | sed 's/keystore file: *//' | head -1)
   address=$(echo "$output" | grep -oE '0x[0-9a-fA-F]{40}' | head -1)
   if [ -z "$file" ] || [ -z "$address" ]; then
