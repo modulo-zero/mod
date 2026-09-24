@@ -25,8 +25,8 @@ function main() {
     SELECTOR="$2 $3 $4"
     PARAMS=${@:5}
   else
-    SELECTOR=$1
-    PARAMS=${@:2}
+    SELECTOR=$2
+    PARAMS=${@:3}
   fi
 
   cast call --rpc-url $RPC $ADDRESS "$SELECTOR" $PARAMS
