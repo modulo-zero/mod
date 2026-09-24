@@ -6,10 +6,12 @@ Tools for working on mod projects.
 ## Installation
 
 ```bash
-git clone <this repo> ~/mod-cli && cd ~/mod-cli
-./install.sh
-mod help
+curl -fsSL https://raw.githubusercontent.com/modulo-zero/mod/main/install.sh | bash
 ```
+
+This clones the repo to `~/mod-cli` and runs the installer. From an existing
+checkout, run `./install.sh` instead. Set `MOD_DIR` to clone somewhere else, or
+`MOD_REPO` to clone over https instead of ssh.
 
 The installer checks for the tools `mod` shells out to, links `mod` onto your
 PATH, creates `.env` from the template, and enables tab completion in bash or

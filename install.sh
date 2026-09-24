@@ -2,12 +2,33 @@
 #
 # Installs mod by linking mod.sh onto your PATH. Safe to rerun.
 #
-#   ./install.sh                 # links into ~/.local/bin (or /usr/local/bin)
-#   MOD_BIN_DIR=/opt/bin ./install.sh
+#   curl -fsSL https://raw.githubusercontent.com/modulo-zero/mod/main/install.sh | bash
+#   ./install.sh                 # from an existing checkout
+#
+#   MOD_DIR=~/src/mod            # where to clone (default ~/mod-cli)
+#   MOD_REPO=<git url>           # what to clone (default github modulo-zero/mod)
+#   MOD_BIN_DIR=/opt/bin         # where to link mod (default /usr/local/bin or ~/.local/bin)
 
 set -u
 
-MOD_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# 0. Locate or fetch the checkout. When piped from curl there is no script
+#    file on disk, so BASH_SOURCE is empty and the repo is cloned first.
+if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "$(dirname "${BASH_SOURCE[0]}")/mod.sh" ]; then
+  MOD_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+  MOD_DIR="${MOD_DIR:-$HOME/mod-cli}"
+  MOD_REPO="${MOD_REPO:-git@github.com:modulo-zero/mod.git}"
+  if ! command -v git >/dev/null 2>&1; then
+    echo "Error: git is not installed."
+    exit 1
+  fi
+  if [ -f "${MOD_DIR}/mod.sh" ]; then
+    echo "Using existing checkout at ${MOD_DIR}"
+  else
+    echo "Cloning ${MOD_REPO} into ${MOD_DIR}..."
+    git clone --quiet "${MOD_REPO}" "${MOD_DIR}" || exit 1
+  fi
+fi
 
 # 1. Runtime dependencies. Node is only needed by `mod pk`, and is checked
 #    lazily by mod.sh the first time that command runs.
