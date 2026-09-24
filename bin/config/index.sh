@@ -1,10 +1,11 @@
 #!/bin/bash
 #
-# mod-usage: mod config [edit|path|check|migrate]
+# mod-usage: mod config [edit|path|check|password|migrate]
 # mod-description: edit or inspect the global config file
 # mod-arg: edit      open the config in $EDITOR (the default)
 # mod-arg: path      print the location of the config file
 # mod-arg: check     list which keys are set, without printing their values
+# mod-arg: password  prompt for the keystore password and store it in ETH_PASSWORD
 # mod-arg: migrate   move a legacy .env from the checkout to the global location
 # mod-note: The config lives at ~/.mod, or wherever MOD_CONFIG points.
 # mod-note: It is created from .env.config by install.sh and is never committed.
@@ -23,8 +24,9 @@ function main() {
   case "${1:-edit}" in
     edit)    edit ;;
     path)    echo "${MOD_CONFIG}" ;;
-    check)   check ;;
-    migrate) migrate ;;
+    check)    check ;;
+    password) password ;;
+    migrate)  migrate ;;
     *)
       echo "Error: unknown subcommand '${1}'"
       mod_missing_args config
@@ -65,11 +67,34 @@ function check() {
   while IFS= read -r key; do
     eval "value=\${${key}:-}"
     if [ -n "${value}" ]; then
-      printf '  %-20s set\n' "${key}"
+      printf '  %-24s set\n' "${key}"
     else
-      printf '  %-20s %bempty%b\n' "${key}" "${MOD_ORANGE:-}" "${MOD_NC:-}"
+      printf '  %-24s %bempty%b\n' "${key}" "${MOD_ORANGE:-}" "${MOD_NC:-}"
     fi
   done <<< "$(template_keys)"
+}
+
+# Writes the keystore password to the file ETH_PASSWORD points to, which is
+# what cast, forge and mod pk read, so the password itself never sits in ~/.mod.
+function password() {
+  local file="${ETH_PASSWORD:-$HOME/.foundry/keystore_password}"
+  file="${file/#\~/$HOME}"
+  local pw1 pw2
+  printf 'Keystore password: '; read -r -s pw1; echo
+  printf 'Confirm: '; read -r -s pw2; echo
+  if [ "$pw1" != "$pw2" ]; then
+    echo "Error: passwords do not match."
+    exit 1
+  fi
+  if [ -z "$pw1" ]; then
+    echo "Error: password is empty."
+    exit 1
+  fi
+  mkdir -p "$(dirname "$file")"
+  (umask 077 && printf '%s' "$pw1" > "$file")
+  chmod 600 "$file"
+  echo "Saved to ${file}"
+  echo "Keystores in ${ETH_KEYSTORE_DIR:-~/.foundry/keystores} must be encrypted with this password."
 }
 
 function migrate() {

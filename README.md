@@ -43,10 +43,17 @@ Keys and secrets live in one file outside the checkout, `~/.mod`
 checked-in template `.env.config`, which holds no real values.
 
 ```bash
-mod config          # open the config in $EDITOR
-mod config check    # list which keys are set, without printing values
-mod config path     # print the file location
+mod config            # open the config in $EDITOR
+mod config check      # list which keys are set, without printing values
+mod config password   # store the keystore password for cast, forge and mod pk
+mod config path       # print the file location
 ```
+
+RPC urls come from each project's `mod.config.json`, so a fresh config needs no
+edits for `rpc`, `balance`, `call` or `address`. The keystore password is not
+kept in the config; `mod config password` writes it to the file `ETH_PASSWORD`
+points to (`~/.foundry/keystore_password` by default), which is what Foundry's
+`--password-file` convention expects.
 
 Older installs that kept a `.env` inside the checkout keep working; run
 `mod config migrate` to move it to the global location.
@@ -74,7 +81,7 @@ optional `l1`/`l2` argument picks a layer for environments that define both.
 | `balance` | `<env> [l1\|l2] <address>` | Show the ether balance of an address. |
 | `balance-full` | `<address>` | Show that balance on every configured network. |
 | `call` | `<env> [l1\|l2] <address> <selector> [args...]` | Make a read-only contract call. |
-| `config` | `[edit\|path\|check\|migrate]` | Edit or inspect the global config file. |
+| `config` | `[edit\|path\|check\|password\|migrate]` | Edit or inspect the global config file. |
 | `drain` | `<address>` | Sweep balances into an address. See known gaps. |
 | `e2e` | `<env> <layers> <contract> <selector> [args...]` | Run an end-to-end script sequence. See known gaps. |
 | `pk` | `<account>` | Print the private key for a keystore account. See below. |
