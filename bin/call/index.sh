@@ -29,7 +29,7 @@ function main() {
     PARAMS=${@:2}
   fi
 
-  cast call --rpc-url $RPC $ADDRESS "$SELECTOR" $PARAMS --keystore ~/.foundry/keystores
+  cast call --rpc-url $RPC $ADDRESS "$SELECTOR" $PARAMS
 }
 
 main $@

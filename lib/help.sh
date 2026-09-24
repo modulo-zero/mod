@@ -142,3 +142,23 @@ mod_missing_args() {
   printf "Run 'mod %s --help' for details.\n" "$1"
   exit 1
 }
+
+# mod_password_file - the keystore password file written by `mod config
+# password`, if it exists. Empty otherwise, in which case cast/forge prompt.
+mod_password_file() {
+  local file="${ETH_PASSWORD_FILE:-}"
+  file="${file/#\~/$HOME}"
+  [ -n "$file" ] && [ -f "$file" ] && echo "$file"
+}
+
+# mod_account_args <account> - the flags to sign with a keystore account
+# without prompting: --account plus --password-file when the file exists.
+mod_account_args() {
+  local file
+  file="$(mod_password_file)"
+  if [ -n "$file" ]; then
+    echo "--account $1 --password-file $file"
+  else
+    echo "--account $1"
+  fi
+}

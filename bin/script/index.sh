@@ -35,8 +35,8 @@ function main() {
   if [ -z $ACCOUNT ]; then
     SENDER=""
   else
-    CALLER=$(cast wallet address --account $ACCOUNT)
-    SENDER="--sender $CALLER --account $ACCOUNT"
+    CALLER=$(cast wallet address $(mod_account_args $ACCOUNT))
+    SENDER="--sender $CALLER $(mod_account_args $ACCOUNT)"
   fi
 
   COMMAND="forge script --rpc-url $RPC $SENDER $SCRIPT_CONTRACT --sig $FUNCTION_NAME $ARGS"

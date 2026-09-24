@@ -33,7 +33,7 @@ function main() {
   if [ -z $ACCOUNT ]; then
     SENDER=""
   else
-    SENDER="--account $ACCOUNT"
+    SENDER="$(mod_account_args $ACCOUNT)"
   fi
 
   cast send --rpc-url $RPC $SENDER $ADDRESS "$SELECTOR" $PARAMS

@@ -47,7 +47,7 @@ function add() {
     fi
   fi
 
-  pw_file="$(keystore_password_file)"
+  pw_file="$(mod_password_file)"
   if [ -n "$pw_file" ]; then
     output=$(cast wallet import -k "$ETH_KEYSTORE_DIR" --private-key $1 --unsafe-password "$(cat "$pw_file")" $2 2>&1)
   else
@@ -56,15 +56,6 @@ function add() {
   address=$(echo "$output" | grep -oE '0x[0-9a-fA-F]{40}' | head -1)
   cp $ETH_KEYSTORE_DIR/$2 $ETH_KEYSTORE_DIR/$address
   echo $output
-}
-
-# keystore_password_file - the file `mod config password` wrote, if any. When it
-# exists create/add encrypt with it instead of prompting, so the file always
-# matches the keystores.
-function keystore_password_file() {
-  local file="${ETH_PASSWORD_FILE:-}"
-  file="${file/#\~/$HOME}"
-  [ -n "$file" ] && [ -f "$file" ] && echo "$file"
 }
 
 function create() {
@@ -84,7 +75,7 @@ function create() {
   # Newer cast versions print the human readable lines on stderr and only the
   # address on stdout, so capture both streams and grep the pieces out rather
   # than depending on the ordering or the stream.
-  pw_file="$(keystore_password_file)"
+  pw_file="$(mod_password_file)"
   if [ -n "$pw_file" ]; then
     output=$(cast wallet new "$ETH_KEYSTORE_DIR" --unsafe-password "$(cat "$pw_file")" 2>&1)
   else
@@ -106,12 +97,7 @@ function create() {
 }
 
 function address() {
-  pw_file="$(keystore_password_file)"
-  if [ -n "$pw_file" ]; then
-    cast wallet address --account $1 --password-file "$pw_file"
-  else
-    cast wallet address --account $1
-  fi
+  cast wallet address $(mod_account_args $1)
 }
 
 function list() {

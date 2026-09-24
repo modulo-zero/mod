@@ -22,7 +22,7 @@ function main() {
     mod_missing_args drain
   fi
 
-  SENDER="--sender $(cast wallet address --account $ACCOUNT) --account $ACCOUNT"
+  SENDER="--sender $(cast wallet address $(mod_account_args $ACCOUNT)) $(mod_account_args $ACCOUNT)"
 
   rpcs_string=$(cat mod.config.json | jq -r ".rpc" | jq -r "keys[]")
   read -a rpcs <<< $rpcs_string
