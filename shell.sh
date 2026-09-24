@@ -20,6 +20,8 @@ function _mod_complete() {
   elif [[ ${prev} == "config" ]]; then
     options="edit path check password migrate"
   elif [[ ${prev} == "wallet" ]]; then
+    options="create add address list remove sol"
+  elif [[ ${prev} == "sol" ]]; then
     options="create add address list remove"
   fi
 

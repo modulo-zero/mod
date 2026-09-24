@@ -34,6 +34,7 @@ Requirements:
 | --- | --- | --- |
 | [Foundry](https://getfoundry.sh) (`cast`, `forge`) | almost everything | `curl -L https://foundry.paradigm.xyz \| bash && foundryup` |
 | `jq` | config lookups | `brew install jq` / `apt install jq` |
+| [Solana CLI](https://solana.com/docs/intro/installation) (`solana-keygen`) | `mod wallet sol` only | `sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"` |
 | node 18+ | `mod pk` only | `brew install node`; its npm packages install on first use |
 
 ### Configuration
@@ -93,6 +94,7 @@ optional `l1`/`l2` argument picks a layer for environments that define both.
 | `upgrade` | | Pull the latest version and rerun the installer. |
 | `verify` | `<verifier> <chain-id> <address> <contract> [forge-args...]` | Verify a deployed contract. |
 | `wallet` | `<subcommand> [args...]` | Manage keystore accounts. Run `mod wallet --help` for subcommands. |
+| `wallet sol` | `<subcommand> [args...]` | The same subcommands for Solana keypairs, via `solana-keygen`. |
 
 Every command in this table accepts `--help` / `-h` for the same information plus
 per-argument detail, e.g. `mod verify --help`.
