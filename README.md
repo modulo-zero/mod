@@ -44,8 +44,8 @@ any checkout:
 
 | File | Holds | Edit with |
 | --- | --- | --- |
-| `~/.mod/env` | secrets: keystore paths, Tenderly and verifier keys | `mod config` |
-| `~/.mod/mod.config.json` | networks and envs shared by every project | `mod config networks` |
+| `~/.mod/env` | secrets: keystore paths, Tenderly and verifier keys | `mod secrets` |
+| `~/.mod/mod.config.json` | networks and envs shared by every project | `mod config` |
 | `<project>/mod.config.json` | project-specific networks and envs | your editor |
 
 The global and project `mod.config.json` are merged key by key, with the project
@@ -57,20 +57,26 @@ walking up from the current directory; with only a global file, `<env>` commands
 work from anywhere.
 
 ```bash
-mod config            # open the secrets file in $EDITOR
-mod config networks   # open the global mod.config.json
-mod config networks create   # write an empty mod.config.json in the current directory
-mod config check      # which secrets are set, plus the merged networks and envs
-mod config password   # store the keystore password for cast, forge and mod pk
+mod config            # open the global mod.config.json in $EDITOR
+mod config create     # write an empty mod.config.json in the current directory
+mod config check      # list the merged networks and envs
+mod config validate   # check the merged mod.config.json: urls, env -> network refs, secrets
 mod config path       # print the file locations
+
+mod secrets           # open the secrets file in $EDITOR
+mod secrets check     # which secrets are set, without printing them
+mod secrets password  # store the keystore password for cast, forge and mod pk
+
+mod env               # list the envs in the merged config
+mod env demo state    # print one field of an env; nested keys are joined with dots
 ```
 
-The keystore password is not kept in the config; `mod config password` writes it
+The keystore password is not kept in the config; `mod secrets password` writes it
 to the file `ETH_PASSWORD_FILE` points to (`~/.foundry/keystore_password` by
 default), which is what Foundry's `--password-file` convention expects.
 
 Older installs that kept a `.env` inside the checkout keep working; run
-`mod config migrate` to move it. A `~/.mod` file from earlier versions is moved
+`mod secrets migrate` to move it. A `~/.mod` file from earlier versions is moved
 to `~/.mod/env` by the installer.
 
 ## Usage
@@ -96,13 +102,14 @@ optional `l1`/`l2` argument picks a layer for environments that define both.
 | `balance` | `<env> [l1\|l2] <address>` | Show the ether balance of an address. |
 | `balance-full` | `<address>` | Show that balance on every configured network. |
 | `call` | `<env> [l1\|l2] <address> <selector> [args...]` | Make a read-only contract call. |
-| `config` | `[edit\|path\|check\|password\|migrate]` | Edit or inspect the global config file. |
+| `config` | `[edit\|create\|check\|validate\|path]` | Edit or inspect `mod.config.json`. |
 | `drain` | `<address>` | Sweep balances into an address. See known gaps. |
 | `e2e` | `<env> <layers> <contract> <selector> [args...]` | Run an end-to-end script sequence. See known gaps. |
 | `env` | `[<env> [key.key]]` | Print an env, or one of its fields, from the merged `mod.config.json`. |
 | `pk` | `<account>` | Print the private key for a keystore account. See below. |
 | `rpc` | `<network>` or `<env> <l1\|l2>` | Resolve the rpc url for a network. |
 | `script` | `<env> [l1\|l2] <contract> <selector> [args...]` | Run a forge script. |
+| `secrets` | `[edit\|check\|password\|migrate]` | Edit or inspect the secrets file. |
 | `send` | `<env> [l1\|l2] <address> <selector> [args...]` | Send a transaction. |
 | `tenderly` | `<env> <l1\|l2>` | Create a Tenderly fork and print its id. |
 | `trace` | `<tx-hash>` | Visualize a transaction trace. See known gaps. |

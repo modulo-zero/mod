@@ -143,7 +143,7 @@ mod_missing_args() {
   exit 1
 }
 
-# mod_password_file - the keystore password file written by `mod config
+# mod_password_file - the keystore password file written by `mod secrets
 # password`, if it exists. Empty otherwise, in which case cast/forge prompt.
 mod_password_file() {
   local file="${ETH_PASSWORD_FILE:-}"

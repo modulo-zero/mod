@@ -69,15 +69,15 @@ fi
 mkdir -p "${MOD_HOME}" && chmod 700 "${MOD_HOME}"
 MOD_CONFIG="${MOD_CONFIG:-${MOD_HOME}/env}"
 if [ -f "${MOD_DIR}/.env" ]; then
-  echo "Note: using the legacy ${MOD_DIR}/.env. Run 'mod config migrate' to move it to ${MOD_CONFIG}."
+  echo "Note: using the legacy ${MOD_DIR}/.env. Run 'mod secrets migrate' to move it to ${MOD_CONFIG}."
 elif [ ! -f "${MOD_CONFIG}" ]; then
   cp "${MOD_DIR}/.env.config" "${MOD_CONFIG}"
   chmod 600 "${MOD_CONFIG}"
-  echo "Created ${MOD_CONFIG} from the template. Run 'mod config' to fill in your keys."
+  echo "Created ${MOD_CONFIG} from the template. Run 'mod secrets' to fill in your keys."
 fi
 if [ ! -f "${MOD_HOME}/mod.config.json" ]; then
   cp "${MOD_DIR}/mod.config.example.json" "${MOD_HOME}/mod.config.json"
-  echo "Created ${MOD_HOME}/mod.config.json. Run 'mod config networks' to add your networks."
+  echo "Created ${MOD_HOME}/mod.config.json. Run 'mod config' to add your networks."
 fi
 
 # 3. Put `mod` on PATH by linking into /usr/local/bin, which every shell

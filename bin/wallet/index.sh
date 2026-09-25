@@ -14,7 +14,7 @@
 # mod-note: file. solana-keygen does not encrypt keypair files, so the keystore
 # mod-note: password does not apply; the files are protected by permissions.
 # mod-note: Keystore location comes from ETH_KEYSTORE_DIR in the config.
-# mod-note: create and add encrypt with the password file from `mod config
+# mod-note: create and add encrypt with the password file from `mod secrets
 # mod-note: password` when it exists, and prompt for one otherwise.
 
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../lib/help.sh"

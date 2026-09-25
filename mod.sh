@@ -101,10 +101,10 @@ main() {
       source "${MOD_CONFIG}"
     else
       case "${1:-}" in
-        "" | config | help | -h | --help) ;;
+        "" | config | secrets | help | -h | --help) ;;
         *)
           echo "Error: no config found at ${MOD_CONFIG}"
-          echo "Run 'mod config' to create it and fill in your keys."
+          echo "Run 'mod secrets' to create it and fill in your keys."
           exit 1
           ;;
       esac

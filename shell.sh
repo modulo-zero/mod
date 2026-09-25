@@ -10,17 +10,17 @@ function _mod_complete() {
   prev="${COMP_WORDS[COMP_CWORD-1]}"
 
   if [[ ${COMP_CWORD} -eq 1 ]]; then
-    options="address balance balance-full call config drain e2e help pk rpc script send tenderly trace upgrade verify wallet"
+    options="address balance balance-full call config drain e2e env help pk rpc script secrets send tenderly trace upgrade verify wallet"
   elif [[ ${prev} == "balance" ||  ${prev} == "script" || ${prev} == "send" || ${prev} == "call" || ${prev} == "rpc" || ${prev} == "tenderly" ]]; then
     options="mainnet sepolia"
   elif [[ ${prev} == "mainnet" || ${prev} == "sepolia" ]]; then
     options="l1 l2"
   elif [[ ${prev} == "verify" ]]; then
     options="etherscan blastscan tenderly tenderly-fork"
-  elif [[ ${prev} == "networks" ]]; then
-    options="create"
+  elif [[ ${prev} == "secrets" ]]; then
+    options="edit check password migrate"
   elif [[ ${prev} == "config" ]]; then
-    options="edit networks path check password migrate"
+    options="edit create check validate path"
   elif [[ ${prev} == "wallet" ]]; then
     options="create add address list remove sol"
   elif [[ ${prev} == "sol" ]]; then
