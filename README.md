@@ -105,7 +105,6 @@ of layer names to networks, such as `{ "l1": ..., "l2": ... }` or `{ "ethereum":
 | `call` | `<env> [layer] <address> <selector> [args...]` | Make a read-only contract call. |
 | `config` | `[edit\|create\|check\|validate\|path]` | Edit or inspect `mod.config.json`. |
 | `drain` | `<address>` | Sweep balances into an address. See known gaps. |
-| `e2e` | `<env> <layers> <contract> <selector> [args...]` | Run an end-to-end script sequence. See known gaps. |
 | `env` | `[<env> [key.key]]` | Print an env, or one of its fields, from the merged `mod.config.json`. |
 | `fork` | `<env> <layer>` or `<network\|url>`, then `[anvil args...]` | Start a local anvil fork. See below. |
 | `pk` | `<account>` | Print the private key for a keystore account. See below. |
@@ -114,7 +113,7 @@ of layer names to networks, such as `{ "l1": ..., "l2": ... }` or `{ "ethereum":
 | `secrets` | `[edit\|check\|password\|migrate]` | Edit or inspect the secrets file. |
 | `send` | `<env> [layer] <address> <selector> [args...]` | Send a transaction. |
 | `tenderly` | `<env> [layer]` | Create a Tenderly fork and print its id. |
-| `trace` | `<tx-hash>` | Visualize a transaction trace. See known gaps. |
+| `trace` | `<env> [layer] <tx-hash>` | Print the decoded call trace of a transaction, via `cast run`. |
 | `upgrade` | | Pull the latest version and rerun the installer. |
 | `verify` | `<verifier> <chain-id> <address> <contract> [forge-args...]` | Verify a deployed contract. |
 | `wallet` | `<subcommand> [args...]` | Manage keystore accounts. Run `mod wallet --help` for subcommands. |
@@ -149,7 +148,7 @@ mod fork https://ethereum-rpc.publicnode.com --state fork.json
 
 ### Aliases
 
-`a`=address, `b`=balance, `c`=call, `e`=e2e, `r`=rpc, `s`=script, `se`=send,
+`a`=address, `b`=balance, `c`=call, `r`=rpc, `s`=script, `se`=send,
 `t`=trace, `ve`=verify, `wa`=wallet.
 
 They are defined once in the `MOD_ALIASES` table in mod.sh, which both the
@@ -174,10 +173,6 @@ already do) so the key never leaves the keystore.
 These commands are present but not currently working. They are listed here so the
 help output stays honest about what ships.
 
-- `trace` invokes `lib/trace-vis/index.js`, which is not in this repo, and hardcodes
-  the rpc url to `http://localhost:9545`.
-- `e2e` shells out to `../../blast.sh`, a leftover from the rename to `mod`; the file
-  does not exist.
 - `drain` never sends anything — the `cast send` is commented out and the balance
   arithmetic around it is unfinished.
 - `call` builds its selector from `$1` instead of `$2` in the non-`returns` branch,

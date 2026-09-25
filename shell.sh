@@ -10,7 +10,7 @@ function _mod_complete() {
   prev="${COMP_WORDS[COMP_CWORD-1]}"
 
   if [[ ${COMP_CWORD} -eq 1 ]]; then
-    options="address balance balance-full call config drain e2e env fork help pk rpc script secrets send tenderly trace upgrade verify wallet"
+    options="address balance balance-full call config drain env fork help pk rpc script secrets send tenderly trace upgrade verify wallet"
   elif [[ ${prev} == "balance" ||  ${prev} == "script" || ${prev} == "send" || ${prev} == "call" || ${prev} == "rpc" || ${prev} == "tenderly" ]]; then
     options="mainnet sepolia"
   elif [[ ${prev} == "mainnet" || ${prev} == "sepolia" ]]; then

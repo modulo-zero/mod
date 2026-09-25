@@ -22,7 +22,6 @@ source "${MOD_DIR}/lib/help.sh"
 MOD_ALIASES="a=address
 b=balance
 c=call
-e=e2e
 r=rpc
 s=script
 se=send

@@ -29,8 +29,6 @@ function main() {
     mod_missing_args wallet
   fi
 
-  cd "${OPTIMISM_MONOREPO_ROOT}"
-
   if [ "${1}" = "sol" ]; then
     sol "${@:2}"
     exit $?
