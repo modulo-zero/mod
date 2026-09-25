@@ -55,7 +55,9 @@ a secret as `${NAME}`, e.g. `"url": "https://mainnet.infura.io/v3/${INFURA_API_K
 so API keys never need to be written into a `mod.config.json`. `mod` finds the project file by
 walking up from the current directory; with only a global file, `<env>` commands
 work from anywhere. Tools that call `mod` from outside the project can point it at
-one with `MOD_PROJECT=/path/to/project`.
+one with `MOD_PROJECT=/path/to/project`. The config location only affects config:
+commands run in your working directory, which is what forge treats as its project,
+so a `mod.config.json` at a repo root works with contracts in a subdirectory.
 
 ```bash
 mod config            # open the global mod.config.json in $EDITOR

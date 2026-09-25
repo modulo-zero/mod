@@ -133,10 +133,10 @@ main() {
 
   get_config
 
-  # Run from the project root when there is one; global-only config still works
-  # from anywhere.
-  [ -n "${PROJECT_DIR:-}" ] && cd "$PROJECT_DIR"
-
+  # PROJECT_DIR only says where mod.config.json is. Commands run in the caller's
+  # working directory, because that is the forge project: foundry.toml,
+  # remappings, deployments/ and broadcast/ are all resolved relative to it, and
+  # it may be a subdirectory of the directory holding the config.
   call $@
 }
 
