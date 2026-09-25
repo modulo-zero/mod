@@ -1,0 +1,10 @@
+{
+  "rpc": {
+    "mainnet": { "url": "https://mainnet.infura.io/v3/<key>" },
+    "sepolia": { "url": "https://sepolia.infura.io/v3/<key>" }
+  },
+  "envs": {
+    "prod":    { "rpc": "mainnet", "verify": true },
+    "staging": { "rpc": "sepolia" }
+  }
+}

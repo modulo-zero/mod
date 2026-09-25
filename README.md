@@ -15,7 +15,7 @@ checkout, run `./install.sh` instead. Set `MOD_DIR` to clone somewhere else, or
 
 The installer checks for the tools `mod` shells out to, links `mod` into
 `/usr/local/bin` (asking for sudo if needed; set `MOD_BIN_DIR` to link elsewhere),
-and creates `~/.mod` from the template. It does not edit your shell rc files and
+and creates the `~/.mod` directory. It does not edit your shell rc files and
 is safe to rerun.
 
 Tab completion and the `m` alias are optional. To enable them, add this line to
@@ -39,25 +39,36 @@ Requirements:
 
 ### Configuration
 
-Keys and secrets live in one file outside the checkout, `~/.mod`
-(override the location with `MOD_CONFIG`). The installer creates it from the
-checked-in template `.env.config`, which holds no real values.
+Everything personal lives under `~/.mod` (override with `MOD_HOME`), outside
+any checkout:
+
+| File | Holds | Edit with |
+| --- | --- | --- |
+| `~/.mod/env` | secrets: keystore paths, Tenderly and verifier keys | `mod config` |
+| `~/.mod/mod.config.json` | networks and envs shared by every project | `mod config networks` |
+| `<project>/mod.config.json` | project-specific networks and envs | your editor |
+
+The global and project `mod.config.json` are merged key by key, with the project
+winning, so networks defined once globally are available in every project and a
+project only needs to declare what differs. `mod` finds the project file by
+walking up from the current directory; with only a global file, `<env>` commands
+work from anywhere.
 
 ```bash
-mod config            # open the config in $EDITOR
-mod config check      # list which keys are set, without printing values
+mod config            # open the secrets file in $EDITOR
+mod config networks   # open the global mod.config.json
+mod config check      # which secrets are set, plus the merged networks and envs
 mod config password   # store the keystore password for cast, forge and mod pk
-mod config path       # print the file location
+mod config path       # print the file locations
 ```
 
-RPC urls come from each project's `mod.config.json`, so a fresh config needs no
-edits for `rpc`, `balance`, `call` or `address`. The keystore password is not
-kept in the config; `mod config password` writes it to the file `ETH_PASSWORD_FILE`
-points to (`~/.foundry/keystore_password` by default), which is what Foundry's
-`--password-file` convention expects.
+The keystore password is not kept in the config; `mod config password` writes it
+to the file `ETH_PASSWORD_FILE` points to (`~/.foundry/keystore_password` by
+default), which is what Foundry's `--password-file` convention expects.
 
 Older installs that kept a `.env` inside the checkout keep working; run
-`mod config migrate` to move it to the global location.
+`mod config migrate` to move it. A `~/.mod` file from earlier versions is moved
+to `~/.mod/env` by the installer.
 
 ## Usage
 

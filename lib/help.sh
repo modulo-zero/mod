@@ -162,3 +162,19 @@ mod_account_args() {
     echo "--account $1"
   fi
 }
+
+# mod_config_json - the effective mod.config.json: the global one under
+# MOD_HOME merged with the current project's, project values winning key by
+# key. Prints {} when neither exists so jq callers still get valid json.
+mod_config_json() {
+  local global="${MOD_HOME:-$HOME/.mod}/mod.config.json"
+  local project="${PROJECT_DIR:+${PROJECT_DIR}/mod.config.json}"
+  local files=()
+  [ -f "$global" ] && files+=("$global")
+  [ -n "$project" ] && [ -f "$project" ] && files+=("$project")
+  if [ ${#files[@]} -eq 0 ]; then
+    echo '{}'
+  else
+    jq -s 'reduce .[] as $x ({}; . * $x)' "${files[@]}"
+  fi
+}

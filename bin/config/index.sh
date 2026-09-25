@@ -1,14 +1,16 @@
 #!/bin/bash
 #
-# mod-usage: mod config [edit|path|check|password|migrate]
+# mod-usage: mod config [edit|networks|path|check|password|migrate]
 # mod-description: edit or inspect the global config file
-# mod-arg: edit      open the config in $EDITOR (the default)
-# mod-arg: path      print the location of the config file
+# mod-arg: edit      open the secrets file in $EDITOR (the default)
+# mod-arg: networks  open the global mod.config.json in $EDITOR
+# mod-arg: path      print the config directory and its files
 # mod-arg: check     list which keys are set, without printing their values
 # mod-arg: password  prompt for the keystore password and store it in ETH_PASSWORD_FILE
 # mod-arg: migrate   move a legacy .env from the checkout to the global location
-# mod-note: The config lives at ~/.mod, or wherever MOD_CONFIG points.
-# mod-note: It is created from .env.config by install.sh and is never committed.
+# mod-note: Everything lives under ~/.mod (or MOD_HOME): env holds secrets and
+# mod-note: mod.config.json holds networks and envs shared by every project.
+# mod-note: A project's own mod.config.json is merged on top of the global one.
 
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../lib/help.sh"
 
@@ -22,8 +24,9 @@ function main() {
   fi
 
   case "${1:-edit}" in
-    edit)    edit ;;
-    path)    echo "${MOD_CONFIG}" ;;
+    edit)     edit ;;
+    networks) networks ;;
+    path)     paths ;;
     check)    check ;;
     password) password ;;
     migrate)  migrate ;;
@@ -40,6 +43,27 @@ function ensure_exists() {
     cp "${TEMPLATE}" "${MOD_CONFIG}"
     chmod 600 "${MOD_CONFIG}"
     echo "Created ${MOD_CONFIG} from the template."
+  fi
+}
+
+GLOBAL_JSON="${MOD_HOME}/mod.config.json"
+
+function paths() {
+  echo "${MOD_HOME}"
+  echo "  env               ${MOD_CONFIG}"
+  echo "  mod.config.json   ${GLOBAL_JSON}"
+}
+
+function networks() {
+  if [ ! -f "${GLOBAL_JSON}" ]; then
+    mkdir -p "${MOD_HOME}"
+    cp "${MOD_ROOT}/mod.config.example.json" "${GLOBAL_JSON}"
+    echo "Created ${GLOBAL_JSON} from the example."
+  fi
+  "${EDITOR:-${VISUAL:-vi}}" "${GLOBAL_JSON}"
+  if ! jq -e . "${GLOBAL_JSON}" >/dev/null 2>&1; then
+    echo "Warning: ${GLOBAL_JSON} is not valid json."
+    exit 1
   fi
 }
 
@@ -72,6 +96,17 @@ function check() {
       printf '  %-24s %bempty%b\n' "${key}" "${MOD_ORANGE:-}" "${MOD_NC:-}"
     fi
   done <<< "$(template_keys)"
+
+  echo
+  if [ -f "${GLOBAL_JSON}" ]; then
+    echo "Global config: ${GLOBAL_JSON}"
+  else
+    echo "Global config: none (run 'mod config networks')"
+  fi
+  [ -n "${PROJECT_DIR:-}" ] && echo "Project config: ${PROJECT_DIR}/mod.config.json"
+  local merged; merged="$(mod_config_json)"
+  printf '  networks: %s\n' "$(echo "$merged" | jq -r '(.rpc // {}) | keys | join(", ")')"
+  printf '  envs:     %s\n' "$(echo "$merged" | jq -r '(.envs // {}) | keys | join(", ")')"
 }
 
 # Writes the keystore password to the file ETH_PASSWORD_FILE points to, which is

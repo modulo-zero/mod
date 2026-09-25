@@ -93,7 +93,8 @@ main() {
   if [[ $MOD_INIT -ne "1" ]]; then
     # Load secrets. The checked-in-tree .env is still honoured for existing
     # installs, otherwise the global config file is used.
-    export MOD_CONFIG="${MOD_CONFIG:-$HOME/.mod}"
+    export MOD_HOME="${MOD_HOME:-$HOME/.mod}"
+    export MOD_CONFIG="${MOD_CONFIG:-${MOD_HOME}/env}"
     if [ -f "${DIR}/.env" ]; then
       source "${DIR}/.env"
     elif [ -f "${MOD_CONFIG}" ]; then
@@ -130,7 +131,9 @@ main() {
 
   get_config
 
-  cd $PROJECT_DIR
+  # Run from the project root when there is one; global-only config still works
+  # from anywhere.
+  [ -n "${PROJECT_DIR:-}" ] && cd "$PROJECT_DIR"
 
   call $@
 }
@@ -172,7 +175,7 @@ call() {
       echo https://dashboard.tenderly.co/$TENDERLY_ORG/$TENDERLY_PROJECT/fork/$FORK_ID
       echo
     else
-      export VERIFY=$(cat ${PROJECT_DIR}/mod.config.json | jq -r ".envs.\"${2}\".verify")
+      export VERIFY=$(mod_config_json | jq -r ".envs.\"${2}\".verify")
       if [[ $3 == "l1" || $3 == "l2" ]]; then
         export DEPLOYMENT_ENVIRONMENT=$2
         export DEPLOYMENT_LAYER=$3

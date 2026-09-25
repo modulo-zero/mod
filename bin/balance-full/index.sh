@@ -21,7 +21,7 @@ function main() {
   if [ $# -lt 1 ]; then
     mod_missing_args balance-full
   fi
-  rpcs_string=$(cat mod.config.json | jq -r ".rpc" | jq -r "keys[]")
+  rpcs_string=$(mod_config_json | jq -r ".rpc" | jq -r "keys[]")
   read -a rpcs <<< $rpcs_string
 
   for rpc in ${rpcs[@]}; do

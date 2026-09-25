@@ -47,16 +47,29 @@ if [ "$missing" -ne 0 ]; then
   exit 1
 fi
 
-# 2. Secrets file, kept outside the checkout so that it survives moves and
-#    reinstalls. Copy the template if there is none yet; never overwrite.
-MOD_CONFIG="${MOD_CONFIG:-$HOME/.mod}"
+# 2. Config directory, kept outside the checkout so that it survives moves
+#    and reinstalls:
+#      ~/.mod/env              secrets, from .env.config
+#      ~/.mod/mod.config.json  global networks and envs, from mod.config.example.json
+#    Existing files are never overwritten.
+MOD_HOME="${MOD_HOME:-$HOME/.mod}"
+if [ -f "${MOD_HOME}" ]; then
+  # Earlier installs kept the secrets in a file at ~/.mod itself.
+  mv "${MOD_HOME}" "${MOD_HOME}.tmp" && mkdir -p "${MOD_HOME}" && mv "${MOD_HOME}.tmp" "${MOD_HOME}/env"
+  echo "Moved ${MOD_HOME} -> ${MOD_HOME}/env"
+fi
+mkdir -p "${MOD_HOME}" && chmod 700 "${MOD_HOME}"
+MOD_CONFIG="${MOD_CONFIG:-${MOD_HOME}/env}"
 if [ -f "${MOD_DIR}/.env" ]; then
   echo "Note: using the legacy ${MOD_DIR}/.env. Run 'mod config migrate' to move it to ${MOD_CONFIG}."
 elif [ ! -f "${MOD_CONFIG}" ]; then
-  mkdir -p "$(dirname "${MOD_CONFIG}")"
   cp "${MOD_DIR}/.env.config" "${MOD_CONFIG}"
   chmod 600 "${MOD_CONFIG}"
   echo "Created ${MOD_CONFIG} from the template. Run 'mod config' to fill in your keys."
+fi
+if [ ! -f "${MOD_HOME}/mod.config.json" ]; then
+  cp "${MOD_DIR}/mod.config.example.json" "${MOD_HOME}/mod.config.json"
+  echo "Created ${MOD_HOME}/mod.config.json. Run 'mod config networks' to add your networks."
 fi
 
 # 3. Put `mod` on PATH by linking into /usr/local/bin, which every shell
