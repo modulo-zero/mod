@@ -94,24 +94,25 @@ its usage line and exits 1 when required arguments are missing.
 
 Commands that take `<env>` resolve it against the `mod.config.json` of the project
 you are currently in; `mod` walks up from your working directory to find it. The
-optional `l1`/`l2` argument picks a layer for environments that define both.
+optional `[layer]` argument picks a layer for environments whose `rpc` is an object
+of layer names to networks, such as `{ "l1": ..., "l2": ... }` or `{ "ethereum": ..., "solana": ... }`.
 
 | Command | Arguments | Description |
 | --- | --- | --- |
 | `address` | `<network> <contract-name>` | Print a deployed contract address from `deployments/`. |
-| `balance` | `<env> [l1\|l2] <address>` | Show the ether balance of an address. |
+| `balance` | `<env> [layer] <address>` | Show the ether balance of an address. |
 | `balance-full` | `<address>` | Show that balance on every configured network. |
-| `call` | `<env> [l1\|l2] <address> <selector> [args...]` | Make a read-only contract call. |
+| `call` | `<env> [layer] <address> <selector> [args...]` | Make a read-only contract call. |
 | `config` | `[edit\|create\|check\|validate\|path]` | Edit or inspect `mod.config.json`. |
 | `drain` | `<address>` | Sweep balances into an address. See known gaps. |
 | `e2e` | `<env> <layers> <contract> <selector> [args...]` | Run an end-to-end script sequence. See known gaps. |
 | `env` | `[<env> [key.key]]` | Print an env, or one of its fields, from the merged `mod.config.json`. |
 | `pk` | `<account>` | Print the private key for a keystore account. See below. |
-| `rpc` | `<network>` or `<env> <l1\|l2>` | Resolve the rpc url for a network. |
-| `script` | `<env> [l1\|l2] <contract> <selector> [args...]` | Run a forge script. |
+| `rpc` | `<network>` or `<env> [layer]` | Resolve the rpc url for a network. |
+| `script` | `<env> [layer] <contract> <selector> [args...]` | Run a forge script. |
 | `secrets` | `[edit\|check\|password\|migrate]` | Edit or inspect the secrets file. |
-| `send` | `<env> [l1\|l2] <address> <selector> [args...]` | Send a transaction. |
-| `tenderly` | `<env> <l1\|l2>` | Create a Tenderly fork and print its id. |
+| `send` | `<env> [layer] <address> <selector> [args...]` | Send a transaction. |
+| `tenderly` | `<env> [layer]` | Create a Tenderly fork and print its id. |
 | `trace` | `<tx-hash>` | Visualize a transaction trace. See known gaps. |
 | `upgrade` | | Pull the latest version and rerun the installer. |
 | `verify` | `<verifier> <chain-id> <address> <contract> [forge-args...]` | Verify a deployed contract. |
@@ -190,7 +191,7 @@ description in `mod help` and the detail page in `mod <command> --help` cannot
 disagree. Both `#` and `//` comments are read, so node commands work the same way.
 
 ```bash
-# mod-usage: mod balance <env> [l1|l2] <address>
+# mod-usage: mod balance <env> [layer] <address>
 # mod-description: show the ether balance of an address
 # mod-arg: <env>       environment named in the project's mod.config.json
 # mod-arg: <address>   address to look up

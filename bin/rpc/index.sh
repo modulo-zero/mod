@@ -1,11 +1,13 @@
 #!/bin/bash
 #
 # mod-usage: mod rpc <network>
-# mod-usage: mod rpc <env> <l1|l2>
+# mod-usage: mod rpc <env> [layer]
 # mod-description: resolve the rpc url for a network
 # mod-arg: <network>   network key under .rpc in mod.config.json
 # mod-arg: <env>       environment named under .envs in mod.config.json
-# mod-arg: <l1|l2>     layer to resolve; both are printed as json if omitted
+# mod-arg: [layer]     layer to resolve, for environments whose rpc is an object
+# mod-arg:             such as {l1, l2} or {ethereum, solana}; all are printed as
+# mod-arg:             json if omitted
 
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../lib/help.sh"
 
@@ -19,31 +21,36 @@ function main() {
     mod_missing_args rpc
   fi
 
-  DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  local config value
+  config="$(mod_config_json)"
+  value="$(jq -c --arg env "$1" '.envs[$env].rpc // empty' <<< "$config")"
 
-  VALUE=$(mod_config_json | jq -r ".envs.\"${1}\".rpc")
-  if ! jq -e . >/dev/null 2>&1 <<<$(echo $VALUE); then
-    if [[ -z $VALUE || $VALUE == "null" ]]; then
-      NETWORK=$1
-    else
-      NETWORK=$VALUE
-    fi
-
-    echo $(rpc_from_network $NETWORK)
-  else
-    L1=$(rpc_from_network $(echo $VALUE | jq -r ".l1"))
-    L2=$(rpc_from_network $(echo $VALUE | jq -r ".l2"))
-    RPCS=$(jq -n "{ l1: \"$L1\", l2: \"$L2\" }")
-    if [[ $2 == "l1" || $2 == "l2" ]]; then
-      echo $RPCS | jq -r ".$2"
-    else
-      echo $RPCS | jq
-    fi
-  fi
+  case "$(jq -r 'type' <<< "${value:-null}")" in
+    string)
+      rpc_from_network "$(jq -r . <<< "$value")"
+      ;;
+    object)
+      if [ -n "${2:-}" ]; then
+        if ! jq -e --arg l "$2" 'has($l)' <<< "$value" >/dev/null; then
+          echo "Error: environment '$1' has no layer '$2'. Layers: $(jq -r 'keys | join(", ")' <<< "$value")" >&2
+          exit 1
+        fi
+        rpc_from_network "$(jq -r --arg l "$2" '.[$l]' <<< "$value")"
+      else
+        # every layer resolved to its url, as {layer: url}
+        jq --argjson rpc "$(jq '.rpc // {}' <<< "$config")" \
+           'with_entries(.value = ($rpc[.value].url // .value))' <<< "$value"
+      fi
+      ;;
+    *)
+      # not an environment: treat the argument as a network name
+      rpc_from_network "$1"
+      ;;
+  esac
 }
 
 function rpc_from_network() {
-  echo $(mod_config_json | jq -r ".rpc.\"${1}\".url")
+  mod_config_json | jq -r --arg n "$1" '.rpc[$n].url // empty'
 }
 
-main $@
+main "$@"

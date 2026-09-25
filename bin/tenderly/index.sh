@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# mod-usage: mod tenderly <env> <l1|l2>
+# mod-usage: mod tenderly <env> [layer]
 # mod-description: create a tenderly fork and print its id
 # mod-arg: <env>      environment named in the project's mod.config.json
-# mod-arg: <l1|l2>    layer to fork
+# mod-arg: [layer]    layer to fork, for environments whose rpc is an object
 # mod-note: Needs TENDERLY_ORG, TENDERLY_PROJECT and TENDERLY_API_KEY in .env.
 
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../lib/help.sh"

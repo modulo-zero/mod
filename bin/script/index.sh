@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# mod-usage: mod script <env> [l1|l2] <script-contract> <function-selector> [args...]
+# mod-usage: mod script <env> [layer] <script-contract> <function-selector> [args...]
 # mod-description: run a forge script
 # mod-arg: <env>                 environment named in the project's mod.config.json
-# mod-arg: [l1|l2]               layer, for environments that define both
+# mod-arg: [layer]               layer, for environments whose rpc is an object
 # mod-arg: <script-contract>     forge script contract to run
 # mod-arg: <function-selector>   signature to invoke, e.g. 'run()'
 # mod-arg: [args...]             extra arguments passed through to forge script

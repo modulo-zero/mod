@@ -5,7 +5,7 @@
 # Sourced by mod.sh and by every command under bin/. Each command documents
 # itself with header comments in its own index.sh / index.js:
 #
-#   # mod-usage: mod balance <env> [l1|l2] <address>
+#   # mod-usage: mod balance <env> [layer] <address>
 #   # mod-description: show the ether balance of an address
 #   # mod-arg: <env>  environment named in mod.config.json
 #   # mod-note: an optional free-form line, printed last
@@ -182,4 +182,14 @@ mod_config_json() {
                   then gsub("\\$\\{(?<n>[A-Za-z_][A-Za-z0-9_]*)\\}"; $ENV[.n] // "")
                   else . end)' "${files[@]}"
   fi
+}
+
+# mod_is_layer <env> <name> - true when <name> is a layer of the environment,
+# i.e. a key of envs.<env>.rpc when that is an object ({l1, l2}, or any names
+# such as {ethereum, solana}). Environments whose rpc is a plain network name
+# have no layers.
+mod_is_layer() {
+  [ -n "${2:-}" ] || return 1
+  mod_config_json | jq -e --arg env "$1" --arg layer "$2" \
+    '.envs[$env].rpc | type == "object" and has($layer)' >/dev/null 2>&1
 }

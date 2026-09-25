@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# mod-usage: mod call <env> [l1|l2] <address> <function-selector> [args...]
+# mod-usage: mod call <env> [layer] <address> <function-selector> [args...]
 # mod-description: make a read-only contract call
 # mod-arg: <env>                 environment named in the project's mod.config.json
-# mod-arg: [l1|l2]               layer, for environments that define both
+# mod-arg: [layer]               layer, for environments whose rpc is an object
 # mod-arg: <address>             contract to call
 # mod-arg: <function-selector>   signature, e.g. 'balanceOf(address)'
 # mod-arg: [args...]             arguments to the function

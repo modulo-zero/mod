@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# mod-usage: mod balance <env> [l1|l2] <address>
+# mod-usage: mod balance <env> [layer] <address>
 # mod-description: show the ether balance of an address
 # mod-arg: <env>       environment named in the project's mod.config.json
-# mod-arg: [l1|l2]     layer, for environments that define both
+# mod-arg: [layer]     layer, for environments whose rpc is an object
 # mod-arg: <address>   address to look up
 
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../lib/help.sh"

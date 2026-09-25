@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# mod-usage: mod send <env> [l1|l2] <address> <function-selector> [args...]
+# mod-usage: mod send <env> [layer] <address> <function-selector> [args...]
 # mod-description: send a transaction
 # mod-arg: <env>                 environment named in the project's mod.config.json
-# mod-arg: [l1|l2]               layer, for environments that define both
+# mod-arg: [layer]               layer, for environments whose rpc is an object
 # mod-arg: <address>             contract to send to
 # mod-arg: <function-selector>   signature, e.g. 'transfer(address,uint256)'
 # mod-arg: [args...]             arguments to the function

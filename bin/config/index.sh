@@ -87,7 +87,7 @@ function check() {
 
 # Shape checks on the merged config, read before secret expansion so an unset
 # ${NAME} is still visible: each file is valid json, every network has a url,
-# every env names a network that exists (directly or as l1/l2), and every
+# every env names a network that exists (directly or per layer), and every
 # referenced secret is set.
 function validate() {
   local file errors=0 problems
@@ -125,11 +125,12 @@ function validate() {
             elif (.value.rpc | type) == "string" then
               (if $rpc[.value.rpc] == null then "envs.\($env).rpc: unknown network \(.value.rpc)" else empty end)
             elif (.value.rpc | type) == "object" then
-              (["l1","l2"][] as $l
-               | if (.value.rpc[$l] | type) != "string" then "envs.\($env).rpc.\($l): missing"
-                 elif $rpc[.value.rpc[$l]] == null then "envs.\($env).rpc.\($l): unknown network \(.value.rpc[$l])"
+              (if (.value.rpc | length) == 0 then "envs.\($env).rpc: no layers defined" else empty end),
+              (.value.rpc | to_entries[] | .key as $l
+               | if (.value | type) != "string" then "envs.\($env).rpc.\($l): must be a network name"
+                 elif $rpc[.value] == null then "envs.\($env).rpc.\($l): unknown network \(.value)"
                  else empty end)
-            else "envs.\($env).rpc: must be a network name or {l1, l2}" end
+            else "envs.\($env).rpc: must be a network name or an object of layer -> network" end
          else empty end),
         ([.. | strings | match("\\$\\{([A-Za-z_][A-Za-z0-9_]*)\\}"; "g").captures[0].string] | unique[]
           | if (env[.] // "") == "" then "secret \(.) is referenced but not set in ~/.mod/env" else empty end)
