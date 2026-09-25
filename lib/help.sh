@@ -165,7 +165,9 @@ mod_account_args() {
 
 # mod_config_json - the effective mod.config.json: the global one under
 # MOD_HOME merged with the current project's, project values winning key by
-# key. Prints {} when neither exists so jq callers still get valid json.
+# key. Strings may reference secrets from ~/.mod/env as ${NAME}; unset names
+# expand to empty. Prints {} when neither file exists so jq callers still get
+# valid json.
 mod_config_json() {
   local global="${MOD_HOME:-$HOME/.mod}/mod.config.json"
   local project="${PROJECT_DIR:+${PROJECT_DIR}/mod.config.json}"
@@ -175,6 +177,9 @@ mod_config_json() {
   if [ ${#files[@]} -eq 0 ]; then
     echo '{}'
   else
-    jq -s 'reduce .[] as $x ({}; . * $x)' "${files[@]}"
+    jq -s 'reduce .[] as $x ({}; . * $x)
+           | walk(if type == "string"
+                  then gsub("\\$\\{(?<n>[A-Za-z_][A-Za-z0-9_]*)\\}"; $ENV[.n] // "")
+                  else . end)' "${files[@]}"
   fi
 }

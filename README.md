@@ -50,7 +50,9 @@ any checkout:
 
 The global and project `mod.config.json` are merged key by key, with the project
 winning, so networks defined once globally are available in every project and a
-project only needs to declare what differs. `mod` finds the project file by
+project only needs to declare what differs. Strings in either file can reference
+a secret as `${NAME}`, e.g. `"url": "https://mainnet.infura.io/v3/${INFURA_API_KEY}"`,
+so API keys never need to be written into a `mod.config.json`. `mod` finds the project file by
 walking up from the current directory; with only a global file, `<env>` commands
 work from anywhere.
 
