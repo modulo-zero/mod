@@ -95,10 +95,12 @@ main() {
     # installs, otherwise the global config file is used.
     export MOD_HOME="${MOD_HOME:-$HOME/.mod}"
     export MOD_CONFIG="${MOD_CONFIG:-${MOD_HOME}/env}"
+    # set -a exports every variable the file assigns, so a plain NAME=value
+    # line reaches forge, cast and the jq ${NAME} expansion without "export".
     if [ -f "${DIR}/.env" ]; then
-      source "${DIR}/.env"
+      set -a; source "${DIR}/.env"; set +a
     elif [ -f "${MOD_CONFIG}" ]; then
-      source "${MOD_CONFIG}"
+      set -a; source "${MOD_CONFIG}"; set +a
     else
       case "${1:-}" in
         "" | config | secrets | help | -h | --help) ;;

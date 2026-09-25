@@ -60,7 +60,7 @@ function main() {
         local port
         port="$(jq -r --arg env "$target" --arg layer "$layer" '
           .envs[$env].rpc[$layer] as $n | .rpc[$n].url // ""
-          | capture("^[a-z]+://[^/:]+:(?<p>[0-9]+)")?.p // empty' <<< "$config")"
+          | (capture("^[a-z]+://[^/:]+:(?<p>[0-9]+)") // {}).p // empty' <<< "$config")"
         if [ -n "$port" ] && ! has_flag port "$@" && ! jq -e 'has("port")' <<< "$spec" >/dev/null; then
           flags+=(--port "$port")
         fi
