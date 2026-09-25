@@ -17,6 +17,8 @@ function _mod_complete() {
     options="l1 l2"
   elif [[ ${prev} == "verify" ]]; then
     options="etherscan blastscan tenderly tenderly-fork"
+  elif [[ ${prev} == "networks" ]]; then
+    options="create"
   elif [[ ${prev} == "config" ]]; then
     options="edit networks path check password migrate"
   elif [[ ${prev} == "wallet" ]]; then

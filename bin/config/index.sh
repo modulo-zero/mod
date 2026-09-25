@@ -4,6 +4,7 @@
 # mod-description: edit or inspect the global config file
 # mod-arg: edit      open the secrets file in $EDITOR (the default)
 # mod-arg: networks  open the global mod.config.json in $EDITOR
+# mod-arg: networks create [dir]   write an empty mod.config.json for a project
 # mod-arg: path      print the config directory and its files
 # mod-arg: check     list which keys are set, without printing their values
 # mod-arg: password  prompt for the keystore password and store it in ETH_PASSWORD_FILE
@@ -25,7 +26,7 @@ function main() {
 
   case "${1:-edit}" in
     edit)     edit ;;
-    networks) networks ;;
+    networks) networks "${@:2}" ;;
     path)     paths ;;
     check)    check ;;
     password) password ;;
@@ -55,6 +56,11 @@ function paths() {
 }
 
 function networks() {
+  case "${1:-}" in
+    create) networks_create "${2:-.}"; return ;;
+    "") ;;
+    *) echo "Error: unknown 'networks' subcommand '${1}'"; mod_missing_args config ;;
+  esac
   if [ ! -f "${GLOBAL_JSON}" ]; then
     mkdir -p "${MOD_HOME}"
     cp "${MOD_ROOT}/mod.config.example.json" "${GLOBAL_JSON}"
@@ -65,6 +71,25 @@ function networks() {
     echo "Warning: ${GLOBAL_JSON} is not valid json."
     exit 1
   fi
+}
+
+# An empty project config. Networks and envs defined here are merged over the
+# global ones, so a new project only declares what differs.
+function networks_create() {
+  local dir="${1}"
+  local file="${dir%/}/mod.config.json"
+  if [ ! -d "$dir" ]; then
+    echo "Error: no such directory: $dir"
+    exit 1
+  fi
+  if [ -f "$file" ]; then
+    echo "Error: $file already exists."
+    exit 1
+  fi
+  printf '{\n  "rpc": {},\n  "envs": {}\n}\n' > "$file"
+  echo "Created $file"
+  echo "Add project networks under \"rpc\" and environments under \"envs\"; the global"
+  echo "${GLOBAL_JSON} is merged underneath, so only list what differs."
 }
 
 function edit() {

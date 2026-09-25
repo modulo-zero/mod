@@ -59,6 +59,7 @@ work from anywhere.
 ```bash
 mod config            # open the secrets file in $EDITOR
 mod config networks   # open the global mod.config.json
+mod config networks create   # write an empty mod.config.json in the current directory
 mod config check      # which secrets are set, plus the merged networks and envs
 mod config password   # store the keystore password for cast, forge and mod pk
 mod config path       # print the file locations
