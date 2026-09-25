@@ -11,6 +11,14 @@
 
 set -u
 
+# Everything is installed per user. Run as root it would create ~/.mod and the
+# checkout owned by root, locking the real user out of their own config.
+if [ "$(id -u)" -eq 0 ] && [ -n "${SUDO_USER:-}" ]; then
+  echo "Error: do not run the installer with sudo. Run it as ${SUDO_USER}; it asks for sudo itself"
+  echo "only for the symlink into /usr/local/bin."
+  exit 1
+fi
+
 # 0. Locate or fetch the checkout. When piped from curl there is no script
 #    file on disk, so BASH_SOURCE is empty and the repo is cloned first.
 if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "$(dirname "${BASH_SOURCE[0]}")/mod.sh" ]; then
