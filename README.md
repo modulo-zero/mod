@@ -107,7 +107,7 @@ of layer names to networks, such as `{ "l1": ..., "l2": ... }` or `{ "ethereum":
 | `drain` | `<address>` | Sweep balances into an address. See known gaps. |
 | `e2e` | `<env> <layers> <contract> <selector> [args...]` | Run an end-to-end script sequence. See known gaps. |
 | `env` | `[<env> [key.key]]` | Print an env, or one of its fields, from the merged `mod.config.json`. |
-| `fork` | `<network\|env [layer]\|url> [anvil args...]` | Start a local anvil fork of a network. |
+| `fork` | `<env> <layer>` or `<network\|url>`, then `[anvil args...]` | Start a local anvil fork. See below. |
 | `pk` | `<account>` | Print the private key for a keystore account. See below. |
 | `rpc` | `<network>` or `<env> [layer]` | Resolve the rpc url for a network. |
 | `script` | `<env> [layer] <contract> <selector> [args...]` | Run a forge script. |
@@ -122,6 +122,30 @@ of layer names to networks, such as `{ "l1": ..., "l2": ... }` or `{ "ethereum":
 
 Every command in this table accepts `--help` / `-h` for the same information plus
 per-argument detail, e.g. `mod verify --help`.
+
+### Local forks
+
+`mod fork` starts anvil forked from an upstream rpc. An env can describe its
+forks next to its rpc layers:
+
+```json
+"demo": {
+  "rpc":  { "node": "axis", "ethereum": "eth-fork", "solana": "sol-fork" },
+  "fork": { "ethereum": { "rpc": "eth-mainnet", "host": "0.0.0.0", "state": "/var/lib/axis/anvil.json" } }
+}
+```
+
+`fork.<layer>.rpc` is the upstream to fork from, a network name or a url. Every
+other key becomes an anvil flag, and the port defaults to the one in the layer's
+own rpc url, so `mod fork demo ethereum` listens where `mod script demo ethereum`
+will look. Anything after the layer goes to anvil and overrides the config:
+
+```bash
+mod fork demo ethereum                  # from the env's fork block
+mod fork demo ethereum --port 8546      # same, on another port
+mod fork mainnet                        # any network, anvil defaults
+mod fork https://ethereum-rpc.publicnode.com --state fork.json
+```
 
 ### Aliases
 

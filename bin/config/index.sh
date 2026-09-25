@@ -87,7 +87,8 @@ function check() {
 
 # Shape checks on the merged config, read before secret expansion so an unset
 # ${NAME} is still visible: each file is valid json, every network has a url,
-# every env names a network that exists (directly or per layer), and every
+# every env names a network that exists (directly or per layer), every fork
+# names a known upstream and an existing layer, and every
 # referenced secret is set.
 function validate() {
   local file errors=0 problems
@@ -131,6 +132,20 @@ function validate() {
                  elif $rpc[.value] == null then "envs.\($env).rpc.\($l): unknown network \(.value)"
                  else empty end)
             else "envs.\($env).rpc: must be a network name or an object of layer -> network" end
+         else empty end),
+        (if ($envs | type) == "object" and ($rpc | type) == "object" then $envs | to_entries[]
+          | .key as $env | .value as $e
+          | if $e.fork == null then empty
+            elif ($e.fork | type) != "object" then "envs.\($env).fork: must be an object of layer -> fork"
+            else $e.fork | to_entries[] | .key as $l
+              | if (.value | type) != "object" then "envs.\($env).fork.\($l): must be an object"
+                elif (.value.rpc | type) != "string" then "envs.\($env).fork.\($l).rpc: missing"
+                elif (.value.rpc | test("^(https?|wss?)://") | not) and $rpc[.value.rpc] == null
+                  then "envs.\($env).fork.\($l).rpc: unknown network \(.value.rpc)"
+                elif ($e.rpc | type) == "object" and ($e.rpc | has($l) | not)
+                  then "envs.\($env).fork.\($l): no matching layer under envs.\($env).rpc"
+                else empty end
+            end
          else empty end),
         ([.. | strings | match("\\$\\{([A-Za-z_][A-Za-z0-9_]*)\\}"; "g").captures[0].string] | unique[]
           | if (env[.] // "") == "" then "secret \(.) is referenced but not set in ~/.mod/env" else empty end)
