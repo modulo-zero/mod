@@ -107,6 +107,7 @@ of layer names to networks, such as `{ "l1": ..., "l2": ... }` or `{ "ethereum":
 | `drain` | `<address>` | Sweep balances into an address. See known gaps. |
 | `e2e` | `<env> <layers> <contract> <selector> [args...]` | Run an end-to-end script sequence. See known gaps. |
 | `env` | `[<env> [key.key]]` | Print an env, or one of its fields, from the merged `mod.config.json`. |
+| `fork` | `<network\|env [layer]\|url> [anvil args...]` | Start a local anvil fork of a network. |
 | `pk` | `<account>` | Print the private key for a keystore account. See below. |
 | `rpc` | `<network>` or `<env> [layer]` | Resolve the rpc url for a network. |
 | `script` | `<env> [layer] <contract> <selector> [args...]` | Run a forge script. |
