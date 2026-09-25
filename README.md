@@ -99,6 +99,7 @@ optional `l1`/`l2` argument picks a layer for environments that define both.
 | `config` | `[edit\|path\|check\|password\|migrate]` | Edit or inspect the global config file. |
 | `drain` | `<address>` | Sweep balances into an address. See known gaps. |
 | `e2e` | `<env> <layers> <contract> <selector> [args...]` | Run an end-to-end script sequence. See known gaps. |
+| `env` | `[<env> [key.key]]` | Print an env, or one of its fields, from the merged `mod.config.json`. |
 | `pk` | `<account>` | Print the private key for a keystore account. See below. |
 | `rpc` | `<network>` or `<env> <l1\|l2>` | Resolve the rpc url for a network. |
 | `script` | `<env> [l1\|l2] <contract> <selector> [args...]` | Run a forge script. |
