@@ -54,7 +54,8 @@ project only needs to declare what differs. Strings in either file can reference
 a secret as `${NAME}`, e.g. `"url": "https://mainnet.infura.io/v3/${INFURA_API_KEY}"`,
 so API keys never need to be written into a `mod.config.json`. `mod` finds the project file by
 walking up from the current directory; with only a global file, `<env>` commands
-work from anywhere.
+work from anywhere. Tools that call `mod` from outside the project can point it at
+one with `MOD_PROJECT=/path/to/project`.
 
 ```bash
 mod config            # open the global mod.config.json in $EDITOR
@@ -160,6 +161,7 @@ dispatcher and `mod help` read.
 | --- | --- |
 | `ACCOUNT` | Keystore account used to sign for `script` and `send`. |
 | `FORK=true` | Route `balance`, `call`, `script` and `send` through a fresh Tenderly fork. |
+| `MOD_PROJECT` | Project directory holding `mod.config.json`, for callers running outside it. |
 
 ### A note on `mod pk`
 

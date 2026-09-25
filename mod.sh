@@ -79,6 +79,7 @@ usage() {
   mod_heading "Environment:"
   printf '  ACCOUNT    keystore account used to sign for script and send\n'
   printf '  FORK=true  route balance, call, script and send through a fresh tenderly fork\n'
+  printf '  MOD_PROJECT  project directory holding mod.config.json, when not running inside it\n'
 
   printf '\n'
   printf 'The second column is the short alias for each command.\n'
@@ -139,6 +140,25 @@ main() {
   call $@
 }
 
+# require_env <name> - stop early when the environment is not in the merged
+# config, naming the files that were read so a wrong working directory is
+# obvious. Network names are accepted too, since mod rpc resolves them.
+require_env() {
+  local config
+  config="$(mod_config_json)"
+  if [ -z "$1" ] || ! jq -e --arg e "$1" '(.envs[$e] // .rpc[$e]) != null' <<< "$config" >/dev/null 2>&1; then
+    echo "Error: no environment or network '${1}' in mod.config.json." >&2
+    echo "  global:  ${MOD_HOME}/mod.config.json$( [ -f "${MOD_HOME}/mod.config.json" ] || echo ' (missing)')" >&2
+    if [ -n "${PROJECT_DIR:-}" ]; then
+      echo "  project: ${PROJECT_DIR}/mod.config.json" >&2
+    else
+      echo "  project: none found above $(pwd -P); set MOD_PROJECT or run from the project" >&2
+    fi
+    echo "Run 'mod config check' to list what is defined." >&2
+    exit 1
+  fi
+}
+
 unknown_command() {
   echo "Error: unknown command '${1}'"
   echo "Run 'mod help' to see the available commands."
@@ -176,6 +196,7 @@ call() {
       echo https://dashboard.tenderly.co/$TENDERLY_ORG/$TENDERLY_PROJECT/fork/$FORK_ID
       echo
     else
+      require_env "${2:-}"
       export VERIFY=$(mod_config_json | jq -r ".envs.\"${2}\".verify")
       if mod_is_layer "$2" "${3:-}"; then
         export DEPLOYMENT_ENVIRONMENT=$2
@@ -218,7 +239,19 @@ ensure_node_deps() {
   fi
 }
 
+# The project is the nearest directory at or above the current one holding a
+# mod.config.json. MOD_PROJECT overrides the search, for tools that call mod
+# from elsewhere, and PROJECT_DIR is honoured when already set by a parent mod.
 get_config() {
+  if [ -n "${MOD_PROJECT:-}" ]; then
+    if [ ! -f "${MOD_PROJECT}/mod.config.json" ]; then
+      echo "Error: MOD_PROJECT=${MOD_PROJECT} has no mod.config.json" >&2
+      exit 1
+    fi
+    export PROJECT_DIR="${MOD_PROJECT}"
+    return
+  fi
+  [ -n "${PROJECT_DIR:-}" ] && return
   dir=$(pwd -P)
   while [ -n "$dir" -a ! -f "$dir/mod.config.json" ]; do
       dir=${dir%/*}
