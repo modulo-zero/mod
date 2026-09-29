@@ -110,7 +110,7 @@ of layer names to networks, such as `{ "l1": ..., "l2": ... }` or `{ "ethereum":
 | `drain` | `<address>` | Sweep balances into an address. See known gaps. |
 | `env` | `[<env> [key.key]]` | Print an env, or one of its fields, from the merged `mod.config.json`. |
 | `fork` | `<env> <layer>` or `<network\|url>`, then `[anvil args...]` | Start a local anvil fork. See below. |
-| `pk` | `<account>` | Print the private key for a keystore account. See below. |
+| `pk` | `<account>` or `sol <name> [--json]` | Print the private key for a keystore account, or a Solana keypair as base58. See below. |
 | `rpc` | `<network>` or `<env> [layer]` | Resolve the rpc url for a network. |
 | `script` | `<env> [layer] <contract> <selector> [args...]` | Run a forge script. |
 | `secrets` | `[edit\|check\|password\|migrate]` | Edit or inspect the secrets file. |

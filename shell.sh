@@ -23,6 +23,8 @@ function _mod_complete() {
     options="edit create check validate path"
   elif [[ ${prev} == "wallet" ]]; then
     options="create add address list remove sol"
+  elif [[ ${prev} == "pk" ]]; then
+    options="sol"
   elif [[ ${prev} == "sol" ]]; then
     options="create add address list remove"
   fi
